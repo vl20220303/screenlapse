@@ -16,7 +16,7 @@ def compile(dirname, fps=None, video_duration=5, delete_imgs=False):
 
     png_paths.sort(key=lambda p: int(os.path.splitext(os.path.basename(p))[0]))
 
-    if fps==None:
+    if fps is None:
         fps=len(png_paths)/(video_duration*60)
 
     first_frame = cv2.imread(png_paths[0])
