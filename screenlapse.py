@@ -10,7 +10,7 @@ def run(interval_minutes, runtime_hours=5.0, dirname="output"):
     version = 1
 
     while os.path.exists(output_dir):
-        output_dir = f"{target_output_dir}{version}"
+        output_dir = f"{target_output_dir}({version})"
         version += 1
 
     os.mkdir(output_dir)
