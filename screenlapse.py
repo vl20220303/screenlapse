@@ -1,6 +1,7 @@
 import pyautogui
 import time
 import os
+import argparse
 
 
 def run(interval_minutes, runtime_hours=5.0, dirname="output"):
@@ -37,7 +38,14 @@ def run(interval_minutes, runtime_hours=5.0, dirname="output"):
 
 
 def main():
-    run(1, dirname="zombs.io")
+    parser = argparse.ArgumentParser(description="Screenlapse: Take screenshots at intervals.")
+    parser.add_argument('--dirname', type=str, default="output", help='Directory name to save screenshots')
+    parser.add_argument('--interval_minutes', type=float, default=1, help='Interval between screenshots in minutes')
+    parser.add_argument('--runtime_hours', type=float, default=5.0, help='Total runtime in hours')
+    parser.add_argument('--delete_imgs', action='store_true', help='Delete images after processing (flag only, not used in run)')
+    args = parser.parse_args()
+
+    run(args.interval_minutes, args.runtime_hours, args.dirname)
 
 
 if __name__ == "__main__":

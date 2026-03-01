@@ -1,6 +1,7 @@
 import os
 import cv2
 import glob
+import argparse
 
 
 def compile(dirname, fps=None, video_duration=5, delete_imgs=False):
@@ -43,3 +44,13 @@ def compile(dirname, fps=None, video_duration=5, delete_imgs=False):
         for path in png_paths:
             os.remove(path)
         print("Deleted source PNGs.")
+
+def main():
+    parser = argparse.ArgumentParser(description="Compile PNG images into a video.")
+    parser.add_argument('--dirname', type=str, required=True, help='Directory name containing PNG images')
+    parser.add_argument('--fps', type=float, default=None, help='Frames per second for the video')
+    parser.add_argument('--video_duration', type=float, default=5, help='Duration of the video in minutes')
+    parser.add_argument('--delete_imgs', action='store_true', help='Delete images after compiling video')
+    args = parser.parse_args()
+
+    compile(args.dirname, args.fps, args.video_duration, args.delete_imgs)
