@@ -1,0 +1,55 @@
+"use strict";
+
+import { setCurPage } from "./utils.js";
+
+const routes = {
+    setup: () => {loadPageWithTransition("setup"); loadPath("setup", "setup")},
+    home: () => {loadPageWithTransition("home"); loadPath("home", "home")},
+    session: (sessionName) => {loadPageWithTransition("session", sessionName ); loadPath(sessionName)},
+    gallery: (sessionName) => {loadPageWithTransition("gallery", sessionName); loadPath(sessionName)},
+    video: (sessionName) => {loadPageWithTransition("video", sessionName); loadPath(sessionName)}
+};
+
+export async function loadPageWithTransition(name, params = {}) {
+    if(!document.startViewTransition){ loadPage(name, params); return; }
+    else{ document.startViewTransition(loadPage(name, params)); }
+}
+
+async function loadPage(name, params={}) {
+    const html = await fetch(`pages/${name}.html`).then(r => r.text());
+    document.getElementById("app").innerHTML = html;
+
+    import(`./pages/${name}.js`).then(module => {
+        module.init(params);
+    });
+
+    setCurPage(name);
+}
+
+export async function loadPath(name, type='directory') {
+    let fullPath = "none";
+
+    if(type==="setup"){
+        name="setup";
+        fullPath = "C:/User/Screenlapse"; console.error ("Implement getting default path.");
+    } else if(type==="home"){
+        fullPath = "C:/User/LapseRecordings"; console.error ("Implement getting home path.");
+        name = fullPath.substring(fullPath.lastIndexOf('/')+1);
+    } else{
+        fullPath = "C:/User/LapseRecordings/" + name; console.error ("Implement getting home path.");
+    }
+
+    if(name.length > 14){
+        document.getElementById("dir-name").setAttribute("title", name);
+        document.getElementById("dir-name").textContent = name.substring(0, 11) + "...";
+    } else{
+        document.getElementById("dir-name").textContent = name;
+    }
+    console.error ("Implement full path fetching server-side.");
+    document.getElementById("full-path").textContent = fullPath;
+    document.getElementById("full-path").setAttribute("title", fullPath);
+}
+
+export function navigate(route, params) {
+    routes[route](params);
+}

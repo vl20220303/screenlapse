@@ -2,10 +2,11 @@ import pyautogui
 import time
 import os
 import argparse
+import compiler
 
 
-def run(interval_minutes, runtime_hours=5.0, dirname="output"):
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+def run(interval_minutes, base_dir=None, runtime_hours=5.0, dirname="output", screen_region:tuple[int,int,int,int]|None=None, compression_scale=1, compile_on_completion=False):
+    current_dir = os.path.dirname(os.path.abspath(__file__)) if base_dir is None else base_dir
     target_output_dir = os.path.join(current_dir, dirname)
     output_dir = target_output_dir
     version = 1
@@ -28,13 +29,19 @@ def run(interval_minutes, runtime_hours=5.0, dirname="output"):
 
         if current_interval > previous_interval:
             file_name = os.path.join(output_dir, f"{current_interval}.png")
-            pyautogui.screenshot(file_name)
+            image = pyautogui.screenshot(file_name, region=screen_region)
+            width, height = image.size
+            image = image.resize(int(width * compression_scale), int(height * compression_scale))
+            image.save(file_name)
             previous_interval = current_interval
             print(f"Successfully wrote screenshot {file_name} to {output_dir}.")
 
         time.sleep(10)
 
-    print(f"Finished recording timelapse. {previous_interval + 1} screenshots taken.")
+    print(f"\033[32mFinished recording timelapse. {previous_interval + 1} screenshots taken.\033[0m")
+
+    if compile_on_completion:
+        compiler.compile(dirname, base_dir=base_dir)
 
 
 def main():

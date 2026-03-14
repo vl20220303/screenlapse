@@ -4,9 +4,12 @@ import glob
 import argparse
 
 
-def compile(dirname, fps=None, video_duration=5, delete_imgs=False):
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+def compile(dirname, base_dir=None, fps=30, video_duration=None, delete_imgs=False):
+    current_dir = os.path.dirname(os.path.abspath(__file__)) if base_dir is None else base_dir
     output_dir = os.path.join(current_dir, dirname)
+    if not os.path.exists(output_dir):
+        print(f"\033[31mFatal error: directory {dirname} [FULL PATH: {output_dir}] does not exist.\033[0m")
+
     output_path = os.path.join(output_dir, f"{dirname}.mp4")
 
     png_paths = glob.glob(os.path.join(output_dir, "*.png"))
@@ -17,12 +20,12 @@ def compile(dirname, fps=None, video_duration=5, delete_imgs=False):
 
     png_paths.sort(key=lambda p: int(os.path.splitext(os.path.basename(p))[0]))
 
-    if fps is None:
+    if video_duration is not None:
         fps=len(png_paths)/(video_duration*60)
 
     first_frame = cv2.imread(png_paths[0])
     if first_frame is None:
-        print(f"Fatal error: could not read {png_paths[0]}.")
+        print(f"\033[31mFatal error: could not read {png_paths[0]}.\033[0m")
         return
     else:
         height, width, _ = first_frame.shape
@@ -38,7 +41,7 @@ def compile(dirname, fps=None, video_duration=5, delete_imgs=False):
         out.write(frame)
 
     out.release()
-    print(f"Video successfully saved to {output_path}.")
+    print(f"\033[32mVideo successfully saved to {output_path}.\033[0m")
 
     if delete_imgs:
         for path in png_paths:

@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="..\css\pages\home.css">
+<div id="container">
+    <select id="sorter">
+        <option value="default" disabled selected hidden>Sort by ...</option>
+        <option value="nameA">Name (A-Z)</option>
+        <option value="nameZ">Name (Z-A)</option>
+        <option value="date0">Date (Latest)</option>
+        <option value="date9">Date (Oldest)</option>
+    </select>
+    <div id="sessions-container">
+        Fetching recordings...
+    </div>
+    <button id="new-button">+</button>
+
+    <dialog id="new-dialog">
+        <div id="new-dialog-container">
+            <div id="record-multiparam-container">
+                <div id="record-params-container">
+                    <div class="param"><h1>Interval (in minutes):</h1> <input id="capture-interval" value="5" autocomplete="off"></div>
+                    <div class="param"><h1>Duration (in hours):</h1> <input id="capture-duration" value="3" autocomplete="off"></div>
+                    <div class="param"><h1>Compression scale:</h1> <input id="capture-compression" value="0.8" autocomplete="off"></div>
+                </div>
+                <div id="record-screen-region-display">
+                    <div id="screen-display-mockup">
+                        <div id="capture-region-mockup"></div>
+                        <div id="capture-region-hover">Select region</div>
+                    </div>
+                </div>
+            </div>
+            <div class="secondary-param"><h1>Compile video on completion?</h1><input type="checkbox" id="compile-video-finish"></div>
+            <div id="record-button-container">
+                <button id="record-confirm">Start Recording</button>
+                <button id="record-cancel">Cancel</button>
+            </div>
+        </div>
+    </dialog>
+</div>

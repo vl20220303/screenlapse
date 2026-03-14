@@ -1,0 +1,94 @@
+/* Themes */
+:root{
+    color-scheme:light dark;
+
+    --background-color: light-dark(rgb(233, 233, 233), rgb(19, 19, 19));
+
+    --item-color: light-dark(rgb(212, 212, 212), rgb(43, 43, 43));
+    --item-hover: light-dark(rgb(165, 165, 165), rgb(85, 85, 85));
+    --item-outline: light-dark(rgb(160, 160, 160), rgb(110, 110, 110));
+
+    --text-color: light-dark(rgb(53, 53, 53), rgb(214, 214, 214));
+    --text-color-secondary: light-dark(rgb(121, 121, 121), rgb(133, 133, 133));
+
+    --accent-purple: rgb(99, 0, 180);
+    --accent-orange: rgb(255, 145, 0);
+    --accent-red: rgb(255, 20, 98);
+    
+    --delete-color: rgb(255, 52, 52);
+    --add-color: rgb(0, 255, 115);
+}
+
+*{
+    margin: 0; padding: 0;
+}
+
+[no-highlight]{
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+body{
+    overflow: hidden; overscroll-behavior: none;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', 'SF Pro', Verdana, Arial, sans-serif;
+}
+
+#app{
+    position: absolute;
+    height: 100%; width: 100%;
+    margin-top: 40px;
+    visibility: hidden;
+}
+
+#menu-bar {
+    position: absolute;
+    display: flex;
+    height: 40px;
+    width: 100%;
+    border-bottom: 1px solid var(--item-color);
+}
+
+#control-container {
+    display: flex; justify-content: center; align-items: center;
+}
+
+.menu-button {
+    height: 40px; width: 55px; border-radius: 0; background-color: var(--background-color);
+    border-style: none;
+}
+.menu-button:hover {
+    background-color: var(--item-color);
+    transition: background-color 0.3s ease;
+}
+#close:hover{
+    background-color: rgb(255, 31, 31); color: white;
+}
+
+#window-buttons {
+    display: flex; margin-left: auto;
+}
+
+#path-display {
+    height: 40px; width: 200px; border-radius: 0;
+    border-left: 1px solid var(--item-color);
+    display: flex;
+}
+
+#dir-name{
+    height: 40px; max-width: 90%; min-width: 0%; border-radius: 0; margin: 0; padding: 0;
+    flex-grow: 0; flex-shrink: 1;
+    text-align: left; text-indent: 20px; color: var(--text-color);
+    line-height: 40px; font-size: 20px;
+    white-space: nowrap; text-overflow: ellipsis;
+}
+
+#full-path {
+    height: 40px; border-radius: 0; margin: 0; padding: 0;
+    flex-grow: 1; flex-shrink: 100;
+    text-align: left; text-indent: 2px; color: var(--text-color-secondary);
+    line-height: 20px; font-size: 15px; margin-top: 18px; margin-right: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}

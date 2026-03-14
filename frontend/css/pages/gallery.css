@@ -1,0 +1,173 @@
+#app{
+    visibility: visible;
+}
+
+#path-display:hover{
+    cursor: pointer;
+}
+
+#container{
+    height: 100%; width: 100%; margin: 0; padding: 0;
+    display: flex; flex-direction: column; overflow: auto; overscroll-behavior: none;
+}
+
+#control-container:hover{
+    cursor: pointer;
+}
+
+#content-container{
+    height: 100%; width: 100%; margin: 0; padding: 0;
+    margin-top: 10vh;
+    display: flex; flex-direction: column; align-items: center;
+}
+
+#image-display{
+    height: 50vh; max-width: 80vw; border-radius: 0; object-fit: contain;
+    background-color: black;
+    aspect-ratio: 2 / 1;
+}
+
+#carousel{
+    height: 10vh; width: 70vh;
+    margin-top: 5vh;
+    overflow-x: scroll; overflow-y: hidden;
+    display: flex; flex-direction: row; align-items: center;
+    mask-image: linear-gradient(to right, transparent 0%, black 50%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 50%, transparent 100%);
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+#carousel::-webkit-scrollbar{
+    display: none;
+}
+#carousel::after{
+    content: ""; width: 26.5vh; flex-shrink: 0;
+}
+#carousel::before{
+    content: ""; width: 26.5vh; flex-shrink: 0;
+}
+.carousel-thumbnail {
+    height: 8vh; width: 6vh;
+    background-color: black;
+    object-fit: cover;
+}
+.carousel-thumbnail[activated]{
+    z-index: 99; border-radius: 0.15vh;
+    box-shadow: 0 0 0.6vh 0.6vh var(--text-color-secondary);
+    transition: box-shadow 0.5s ease;
+}
+.carousel-thumbnail:hover {
+    z-index: 100; border-radius: 0.15vh;
+    box-shadow: 0 0 0.6vh 0.6vh var(--text-color);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease;
+}
+
+#controls{
+    height: 10vh; margin: 0; padding: 0;
+    margin-top: 5px;
+    display: flex; gap: 5vh; align-items: center;
+}
+#controls button{
+    height: 8vh; width: 8vh; margin: 0; padding: 0; border-radius: 1vh;
+    background-color: var(--background-color); color: var(--text-color);
+    font-size: 5vh; font-weight: 500; font-family: serif;
+    line-height: 5vh;
+    border: none;
+}
+#controls button:hover{
+    cursor: pointer; background-color: var(--item-hover);
+}
+#controls button:active{
+    border: 2px solid var(--text-color);
+}
+
+#index-selector{
+    height: 7vh; width: 10vh; margin: 0; padding: 0;
+    margin-top: 1vh;
+    display: flex; align-items: center; justify-content: center; gap: 0.5em;
+}
+#index-selector input{
+    height: 5vh; width: 8vh; margin: 0; padding: 0;
+    background-color: var(--background-color); border: 2px solid var(--item-color);
+    align-self: center; text-align: center;
+    font-size: 3vh; font-weight: lighter; color: var(--text-color); font-family: 'Segoe UI', 'SF Pro', Verdana, Arial, sans-serif;
+}
+#index-selector h1{
+    height: 3vh;
+    align-self: center; text-align: center; line-height: 3vh;
+    font-size: 3vh; font-weight: lighter; color: var(--text-color);
+}
+
+#delete-button{
+    height: 50px; width: 50px; border-radius: 8px; margin: 0; padding: 0;
+    position: absolute; bottom: 80px; right: 50px;
+    background-color: var(--item-color); border: none;
+    color: var(--text-color);
+    box-shadow: 0 0 7px 3px var(--background-color);
+    transition: background-color 0.3s ease;
+}
+#delete-button:hover{
+    background-color: var(--delete-color); color: white;
+    cursor: pointer;
+}
+#delete-button:active{
+    border: 2px solid var(--text-color);
+}
+
+#delete-dialog{
+    align-self: center; justify-self: center;
+    height: 200px; width: 300px; background-color: var(--item-color); border-radius: 10px;
+    box-shadow: 0 0 20px 5px black; border-style: none;
+}
+#delete-dialog::backdrop{
+    backdrop-filter: blur(1.5px);
+    background-color: rgb(from var(--background-color) r g b / 0.3);
+}
+
+#delete-dialog-container{
+    display: flex; flex-direction: column; align-items: center;
+    height: 100%; width: 100%;
+}
+
+#delete-text-container{
+    display: flex; flex-direction: column; gap: 10px; padding: 20px;
+}
+#delete-text-container h1{
+    font-size: 23px; font-weight: 400;
+}
+#delete-text-container h2{
+    font-size: 17px; font-weight: 400;
+}
+
+#delete-button-container{
+    margin: 0;
+    display: flex; align-items: center; justify-content: center; gap: 20px;
+    height: 70px; width: 300px; background-color: var(--background-color);
+}
+#delete-button-container button{
+    width: 120px; height: 40px; border-radius: 10px;
+    padding-inline: 30px; padding-block: 10px;
+    font-size: 17px; font-weight: 400; font-family: 'Segoe UI', 'SF Pro', Verdana, Arial, sans-serif;
+    line-height: 17px; text-align: center;
+    color: var(--text-color); background-color: var(--item-color);
+    border: 2px solid var(--text-color-secondary);
+}
+#delete-button-container button:hover{
+    cursor: pointer;
+    border: 3px solid var(--text-color);
+    transition-property: background-color, color;
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
+}
+#delete-button-container button:active{
+    border: 4px solid var(--text-color);
+}
+
+#delete-confirm:hover {
+    color: black; background-color: var(--delete-color);
+}
+#delete-cancel:hover {
+    color: var(--text-color); background-color: var(--item-hover);
+}

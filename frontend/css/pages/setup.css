@@ -1,0 +1,101 @@
+#app{
+    visibility: visible;
+}
+
+#container{
+    height: 100%; width: 100%; border-radius: 0; margin: 0; padding: 0;
+    display: flex;
+}
+
+#setup-icon{
+    height: 100%; width: 50%; border-radius: 0; margin: 0; padding: 0;
+    object-fit: cover; object-position: top left;
+}
+
+#setup-container{
+    height: 100%; width: 50%; border-radius: 0; margin: 0; padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#setup-container h1 {
+    height: 40px; width: 300px; border-radius: 0; margin: 0; padding: 0;
+    margin-bottom: 10px;
+    text-align: center; color: var(--text-color); line-height: 40px; font-size: 40px;
+}
+
+#setup-container p {
+    height: 40px; width: 300px; border-radius: 0; margin: 0; padding: 0;
+    margin-bottom: 5px;
+    text-align: center; color: var(--text-color); line-height: 20px; font-size: 15px;
+}
+
+#browse-container {
+    margin-bottom: 30px;
+}
+
+#browse-button {
+    height: 20px; width: 60px; border-radius: 3px;
+    background-color: var(--background-color); color: var(--text-color);
+    border: 1px solid var(--item-hover);
+}
+#browse-button:hover{
+    background-color: var(--item-color);
+    cursor: pointer;
+}
+#browse-button:active{
+    border-color: var(--text-color);
+    cursor: pointer;
+}
+
+#theme-container {
+    display: flex;
+}
+
+.theme-button {
+    height: 30px; width: 30px; border-radius: 3px; margin: 5px; padding: 0;
+    border: 1px solid var(--item-color);
+}
+.theme-button:hover, .theme-button[pressed]{
+    box-shadow: 0 0 4px 3px var(--text-color);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease;
+}
+
+#light-theme {
+    background-color: rgb(230, 230, 230);
+    color: rgb(20, 20, 20);
+}
+
+#dark-theme {
+    background-color: rgb(20, 20, 20);
+    color: rgb(230, 230, 230);
+}
+
+#system-theme {
+    background-color: grey;
+    background-image: linear-gradient(to bottom right, rgb(230, 230, 230) 50%, rgb(20, 20, 20) 50%);
+    color: rgb(20, 20, 20);
+}
+
+#theme-descriptor {
+    text-align: center; color: var(--text-color); line-height: 20px; font-size: 15px;
+    margin-bottom: 10px;
+}
+
+#setup-button {
+    height: 20px; width: 90px; border-radius: 3px;
+    background-color: var(--item-color); color: var(--text-color);
+    border: 0
+}
+#setup-button:hover{
+    background-color: var(--item-hover);
+    background-image: linear-gradient(to bottom right, var(--accent-purple), var(--accent-red), var(--accent-orange));
+    cursor: pointer;
+}
+#setup-button:active{
+    border: 2px solid var(--text-color);
+}

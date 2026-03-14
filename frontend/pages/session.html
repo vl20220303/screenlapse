@@ -1,0 +1,43 @@
+<link rel="stylesheet" href="..\css\pages\session.css">
+<div id="container">
+    <button id="compile" title="Compile images into a video." no-highlight>Compile</button>
+    <div id="content-container">
+        <div id="gallery-container" class="media-container">
+            <div class="hover-highlighter" id="gallery"></div>
+            <img id="gallery-thumbnail" no-highlight>
+            <h1>Gallery</h1>
+        </div>
+        <div id="video-container" class="media-container">
+            <div class="hover-highlighter" id="video"></div>
+            <img id="video-thumbnail" no-highlight>
+            <h1>Video</h1>
+        </div>
+    </div>
+    <button id="delete-button" no-highlight>🗙</button>
+    <dialog id="delete-dialog">
+        <div id="delete-dialog-container">
+            <div id="delete-text-container">
+                <h1>Do you want to delete this record?</h1>
+                <h2>This action cannot be undone.</h2>
+            </div>
+            <div id="delete-button-container">
+                <button id="delete-confirm">Yes</button>
+                <button id="delete-cancel">Cancel</button>
+            </div>
+        </div>
+    </dialog>
+    
+    <dialog id="compile-dialog">
+        <div id="compile-dialog-container">
+            <div id="compile-params-container">
+                <div class="param"><h1>FPS:</h1> <input id="video-fps" autocomplete="off"></div>
+                <div class="param"><h1>Duration (in seconds):</h1> <input id="video-duration" autocomplete="off"></div>
+            </div>
+            <div class="secondary-param"><h1>Delete image gallery?</h1><input type="checkbox" id="delete-imgs-finish"></div>
+            <div id="compile-button-container">
+                <button id="compile-confirm">Compile</button>
+                <button id="compile-cancel">Cancel</button>
+            </div>
+        </div>
+    </dialog>
+</div>

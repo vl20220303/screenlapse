@@ -1,2 +1,5 @@
-/zombs.io
+/zombs.io*
 /.vscode
+/.venv
+/__pycache__
+*.mp4
