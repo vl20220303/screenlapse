@@ -1,10 +1,10 @@
-import os
+import os, send2trash
 import cv2
 import glob
 import argparse
 
 
-def compile(dirname, base_dir=None, fps=30, video_duration=None, delete_imgs=False):
+def compile(dirname, base_dir=None, fps:float=30, video_duration=None, delete_imgs=False):
     current_dir = os.path.dirname(os.path.abspath(__file__)) if base_dir is None else base_dir
     output_dir = os.path.join(current_dir, dirname)
     if not os.path.exists(output_dir):
@@ -45,7 +45,7 @@ def compile(dirname, base_dir=None, fps=30, video_duration=None, delete_imgs=Fal
 
     if delete_imgs:
         for path in png_paths:
-            os.remove(path)
+            send2trash.send2trash(path)
         print("Deleted source PNGs.")
 
 def main():

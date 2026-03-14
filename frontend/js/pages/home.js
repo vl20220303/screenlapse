@@ -2,7 +2,7 @@
 import { setTheme, getCurPage } from "../utils.js";
 import { navigate } from "../app.js";
 
-export function init(){
+export async function init(){
     
     const controlContainer = document.getElementById("control-container");
     const themeAttributes = [
@@ -13,37 +13,27 @@ export function init(){
     const reverseThemeAttributes = {
         "light" : 0, "light dark" : 1, "dark" : 2
     }
-    function controlContainerSetTheme(idx){
+    async function controlContainerSetTheme(idx){
         const key = themeAttributes[idx][0];
         const value = themeAttributes[idx][1];
         controlContainer.textContent = key.charAt(0).toUpperCase();
+        await window.pywebview.api.save_preferred_theme(value);
         setTheme(value);
     }
 
-    let idx = reverseThemeAttributes[getComputedStyle(document.documentElement).getPropertyValue("color-scheme")];
-    if(console.error("Implement theme fetching on-startup.")!=null){
-        idx = 0;
-    }
+    let idx = reverseThemeAttributes[await window.pywebview.api.get_theme()];
+
     controlContainerSetTheme(idx);
     controlContainer.addEventListener('click', function() {
         if(getCurPage()!='home') return;
         idx = (idx+1)%3;
         controlContainerSetTheme(idx);
-        console.error("Implement theme setting.");
     })
 
     const sessionsContainer = document.getElementById("sessions-container");
 
-    const sessionsData = [];
-    for(let i = 0; i<20; i++){
-        sessionsData.push({
-            sessionName : `Session g${Math.random(i)}`,
-            sessionDate : `${i<10 ? "0" + i : i}/${i<10 ? "0" + i : i}/2026`,
-            sessionImg : "../resources/setup.png"
-        });
-    }
+    let sessionsData = await window.pywebview.api.get_sessions();
     sessionsData.sort((a, b) => b.sessionDate.localeCompare(a.sessionDate));
-    console.error("Implement fetching of sessions data");
 
     function renderSessions() {
         let sessionsHTML = "";
@@ -61,6 +51,7 @@ export function init(){
         sessionsContainer.innerHTML = sessionsHTML;
         sessionsContainer.querySelectorAll('.hover-highlighter').forEach((element, index) => {
             element.addEventListener("click", function() {
+                clearInterval(checker);
                 navigate("session", element.id);
             });
         });
@@ -69,6 +60,10 @@ export function init(){
 
     const sorter = document.getElementById("sorter");
     sorter.addEventListener("input", function() {
+        reRenderSessions();
+    })
+
+    function reRenderSessions() {
         if(sorter.value=="nameA"){
             sessionsData.sort((a, b) => a.sessionName.localeCompare(b.sessionName));
         } else if(sorter.value=="nameZ"){
@@ -79,11 +74,26 @@ export function init(){
             sessionsData.sort((a, b) => a.sessionDate.localeCompare(b.sessionDate));
         }
         renderSessions();
-    })
+    }
 
-    document.getElementById('path-display').addEventListener('click', function() {
-        console.error('Implement base folder selection.');
-    })
+    const checker = setInterval(async () => {
+        const newSessionsData = await window.pywebview.api.get_sessions();
+        sessionsData = newSessionsData;
+        reRenderSessions();
+    }, 2500);
+
+
+    const pathDisplay = document.getElementById('path-display');
+    async function updateDirPath() {
+        pathDisplay.removeEventListener('click', updateDirPath);
+        const newPath = await window.pywebview.api.choose_directory();
+        if(!newPath) return;
+        await window.pywebview.api.save_recordings_dir(newPath);
+        clearInterval(checker);
+        navigate("home", null);
+    }
+    pathDisplay.addEventListener('click', updateDirPath);
+
 
     document.getElementById('new-button').addEventListener('click', function() {
         const recordDialog = document.getElementById("new-dialog");
@@ -98,17 +108,31 @@ export function init(){
 
         screenDisplay.addEventListener('click', () => {
             console.error('Implement region selection');
-            const left = (Math.random()*100); const top = (Math.random()*100);
-            const width = (Math.random()*100); const height = (Math.random()*100);
+            const left = 0; const top = 0;
+            const width = 0; const height = 0;
 
             regionIndicator.style.left = `${left}%`; regionIndicator.style.top = `${top}%`;
             regionIndicator.style.width = `${width}%`; regionIndicator.style.height = `${height}%`;
             regionIndicator.style.visibility = 'visible';
             
         })
-        document.getElementById("record-confirm").addEventListener('click', () => {
-            console.error('Implement record creation.');
+        
+        let confirmingRecording = 0;
+        document.getElementById("record-confirm").addEventListener('click', async () => {
+            if(confirmingRecording!=0){ return; }
+            
+            const interval = document.getElementById("capture-interval").value;
+            const duration = document.getElementById("capture-duration").value;
+            const compression = document.getElementById("capture-compression").value;
+            const name = document.getElementById("capture-name").value;
+            const compile = document.getElementById("compile-video-finish").checked;
+
+            if(!name){ console.log(interval); return; }
+
+            confirmingRecording++;
+            window.pywebview.api.start_recording(interval, duration, name, null, compression, compile);
             recordDialog.close();
+            confirmingRecording--;
         });
         document.getElementById("record-cancel").addEventListener('click', () => {
             recordDialog.close();

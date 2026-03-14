@@ -2,10 +2,12 @@ import pyautogui
 import time
 import os
 import argparse
-import compiler
+from . import compiler
 
 
-def run(interval_minutes, base_dir=None, runtime_hours=5.0, dirname="output", screen_region:tuple[int,int,int,int]|None=None, compression_scale=1, compile_on_completion=False):
+def run(interval_minutes, base_dir=None, runtime_hours=5.0, dirname="output", screen_region:tuple[int,int,int,int]|None=None, compression_scale:float=1, compile_on_completion=False):
+    compression_scale = min(max(compression_scale, 0), 1)
+    
     current_dir = os.path.dirname(os.path.abspath(__file__)) if base_dir is None else base_dir
     target_output_dir = os.path.join(current_dir, dirname)
     output_dir = target_output_dir
@@ -31,7 +33,8 @@ def run(interval_minutes, base_dir=None, runtime_hours=5.0, dirname="output", sc
             file_name = os.path.join(output_dir, f"{current_interval}.png")
             image = pyautogui.screenshot(file_name, region=screen_region)
             width, height = image.size
-            image = image.resize(int(width * compression_scale), int(height * compression_scale))
+            print(width, height)
+            image = image.resize((int(width * compression_scale), int(height * compression_scale)))
             image.save(file_name)
             previous_interval = current_interval
             print(f"Successfully wrote screenshot {file_name} to {output_dir}.")
@@ -52,7 +55,7 @@ def main():
     parser.add_argument('--delete_imgs', action='store_true', help='Delete images after processing (flag only, not used in run)')
     args = parser.parse_args()
 
-    run(args.interval_minutes, args.runtime_hours, args.dirname)
+    run(interval_minutes=args.interval_minutes, runtime_hours=args.runtime_hours, dirname=args.dirname)
 
 
 if __name__ == "__main__":

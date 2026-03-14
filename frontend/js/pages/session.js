@@ -3,45 +3,59 @@
 import { navigate } from "../app.js";
 import { getCurPage } from "../utils.js";
 
-export function init(sessionName){
+export async function init(sessionName){
     const controlContainer = document.getElementById("control-container");
     controlContainer.textContent = '←';
     controlContainer.addEventListener('click', function() {
         if(getCurPage().substring(0,8)!='session') return;
+        clearInterval(videoChecker);
+        clearInterval(galleryChecker);
         navigate("home", null);
     })
 
-    let videoCompiled = false;
-    setInterval(() => {
-        videoCompiled = console.error('Implement video compiled check')==null;
-        if(!videoCompiled){ document.getElementById("video-container").style.display = 'none'; } 
-        else{ document.getElementById("video-container").style.display = 'visible'; }
-    }, 2500);
+    let galleryExists = false;
+    async function checkGalleryExists(){
+        galleryExists = (await window.pywebview.api.get_num_images(sessionName) > 0);
+        if(!galleryExists){ document.getElementById("gallery-container").style.visibility = 'hidden'; } 
+        else{ document.getElementById("gallery-container").style.visibility = 'visible';}
+    }
+    checkGalleryExists();
+    const galleryChecker = setInterval(async () => {
+        checkGalleryExists();
+    }, 2000);
 
-    const thumbnailImage = "../resources/setup.png"; console.error('Implement thumbnail fetching.');
+    let videoCompiled = false;
+    async function checkVideoCompiled(){
+        videoCompiled = await window.pywebview.api.video_already_compiled(sessionName);
+        if(!videoCompiled){ document.getElementById("video-container").style.visibility = 'hidden'; } 
+        else{ document.getElementById("video-container").style.visibility = 'visible';}
+    }
+    checkVideoCompiled();
+    const videoChecker = setInterval(async () => {
+        checkVideoCompiled();
+    }, 2000);
+
+    const thumbnailImage = await window.pywebview.api.get_thumbnail(sessionName);
     document.querySelectorAll('img').forEach((element, index) => {
         element.src = thumbnailImage;
     })
 
     document.querySelectorAll('.hover-highlighter').forEach((element, index) => {
         element.addEventListener('click', function() {
+            clearInterval(videoChecker);
+            clearInterval(galleryChecker);
             navigate(element.id, sessionName);
         });
     });
 
-    document.getElementById('path-display').addEventListener('click', function() {
-        console.error('Implement path renaming.');
-    })
-
-    document.getElementById('compile').addEventListener('click', function() {
-        console.error('Implement video compilation.');
-    })
-
-    document.getElementById('delete-button').addEventListener('click', function() {
+    document.getElementById('delete-button').addEventListener('click', async function() {
+        if(await window.pywebview.api.recording_active(sessionName)){ return; }
         const deleteDialog = document.getElementById("delete-dialog");
         deleteDialog.showModal();
-        document.getElementById("delete-confirm").addEventListener('click', () => {
-            console.error('Implement folder deletion.');
+        document.getElementById("delete-confirm").addEventListener('click', async () => {
+            await window.pywebview.api.delete_session(sessionName);
+            clearInterval(videoChecker);
+            clearInterval(galleryChecker);
             navigate("home", null);
         })
         document.getElementById("delete-cancel").addEventListener('click', () => {
@@ -49,12 +63,12 @@ export function init(sessionName){
         })
     });
 
-    document.getElementById('compile').addEventListener('click', function() {
-        if(console.error('Implement checking of active recording.')!=null){ return; }
+    document.getElementById('compile').addEventListener('click', async function() {
+        if(await window.pywebview.api.recording_active(sessionName)){ return; }
         const compileDialog = document.getElementById("compile-dialog");
         compileDialog.showModal();
         
-        const gallerySize = 20; console.error("Implement getting of gallery size");
+        const gallerySize = await window.pywebview.api.get_num_images(sessionName);
         const durationInput = document.getElementById("video-duration");
         const fpsInput = document.getElementById("video-fps");
         durationInput.value = Math.round(gallerySize / 20);
@@ -75,7 +89,12 @@ export function init(sessionName){
         });
 
         document.getElementById("compile-confirm").addEventListener('click', () => {
-            console.error('Implement video compilation.');
+            
+            const fps = document.getElementById("video-fps").value;
+            const duration = document.getElementById("video-duration").value;
+            const deleteGallery = document.getElementById("delete-imgs-finish").checked;
+
+            window.pywebview.api.start_compiling(sessionName, fps, duration, deleteGallery);
             compileDialog.close();
         });
         document.getElementById("compile-cancel").addEventListener('click', () => {

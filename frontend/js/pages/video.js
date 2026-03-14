@@ -3,7 +3,7 @@
 import { navigate } from "../app.js";
 import { getCurPage } from "../utils.js";
 
-export function init(sessionName){
+export async function init(sessionName){
     const controlContainer = document.getElementById("control-container");
     controlContainer.textContent = '←';
     controlContainer.addEventListener('click', function() {
@@ -12,6 +12,7 @@ export function init(sessionName){
     })
 
     const videoDisplay = document.getElementById("video-display");
+    videoDisplay.src = await window.pywebview.api.get_video(sessionName);
     const seekBar = document.getElementById("seek-bar");
     const seekLength = 1000;
     videoDisplay.addEventListener('timeupdate', function() {
@@ -45,15 +46,11 @@ export function init(sessionName){
         }
     })
 
-    document.getElementById('path-display').addEventListener('click', function() {
-        console.error('Implement path renaming.');
-    })
-
     document.getElementById('delete-button').addEventListener('click', function() {
         const deleteDialog = document.getElementById("delete-dialog");
         deleteDialog.showModal();
         document.getElementById("delete-confirm").addEventListener('click', () => {
-            console.error('Implement video deletion.');
+            window.pywebview.api.delete_video(sessionName);
             navigate("session", sessionName);
         })
         document.getElementById("delete-cancel").addEventListener('click', () => {

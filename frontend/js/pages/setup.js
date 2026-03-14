@@ -1,9 +1,9 @@
 "use strict";
 
-import { setTheme } from '../utils.js';
+import { setTheme, getTheme } from '../utils.js';
 import { navigate } from '../app.js';
 
-export function init(){
+export async function init(){
     const controlContainer = document.getElementById("control-container");
     controlContainer.innerHTML = "O";
 
@@ -27,29 +27,29 @@ export function init(){
     }
 
     themeContainer.querySelectorAll('.theme-button').forEach((element, index) => {
-        element.addEventListener("click", function() {
+        element.addEventListener("click", async function() {
             deactivateAllThemes();
             this.setAttribute('pressed', '');
             themeDescriptor.textContent = themeDescriptors[element.id];
+            await window.pywebview.api.save_preferred_theme(element.id);
             setTheme(themeAttributes[element.id]);
-            console.error("Implement mode updating server-side.");
         });
     });
 
     const pathDisplay = document.getElementById("path-input");
-    const defaultPath = "C:/User/DefaultPath"; console.error("Implement getting default path.");
+    const defaultPath = await window.pywebview.api.get_exec_dir();
     pathDisplay.value = defaultPath;
 
     const folderBrowseButton = document.getElementById("browse-button");
-    folderBrowseButton.addEventListener("click", () => {
-        console.error("Implement folder browsing server-side.");
-        const newPath = "C:/User/NewPath/" + Math.random(); console.error("Implement getting selected path.");
+    folderBrowseButton.addEventListener("click", async () => {
+        const newPath = await window.pywebview.api.choose_directory();
         pathDisplay.value = newPath;
     });
 
     const setupButton = document.getElementById("setup-button");
-    setupButton.addEventListener('click', function() {
-        console.error("Implement setup.");
+    setupButton.addEventListener('click', async function() {
+        await window.pywebview.api.save_preferred_theme(getTheme());
+        await window.pywebview.api.save_recordings_dir(pathDisplay.value);
         navigate("home", null);
     });
 }

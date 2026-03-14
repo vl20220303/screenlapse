@@ -5,6 +5,11 @@ export function setTheme(theme){
     root.style.setProperty('color-scheme', theme);
 }
 
+export function getTheme(){
+    const root = document.documentElement;
+    return getComputedStyle(root).getPropertyValue('color-scheme');
+}
+
 export function getCurPage(){
     const root = document.documentElement;
     return(root.getAttribute('current-page'));

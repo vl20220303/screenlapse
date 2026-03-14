@@ -3,7 +3,7 @@
 import { navigate } from "../app.js";
 import { getCurPage } from "../utils.js";
 
-export function init(sessionName){
+export async function init(sessionName){
     const controlContainer = document.getElementById("control-container");
     controlContainer.textContent = '←';
     controlContainer.addEventListener('click', function() {
@@ -14,10 +14,7 @@ export function init(sessionName){
     const imgDisplay = document.getElementById('image-display');
     const indexInput = document.getElementById('index-input');
 
-    const imgData = []; console.error('Implement getting of imgs');
-    for(let i = 0; i<20; i++){
-        imgData.push(i%2==0 ? "../resources/setup.png" : "none.png");
-    }
+    const imgData = await window.pywebview.api.get_images(sessionName);
     document.getElementById('total-number-imgs').innerText = imgData.length;
 
     let imgIdx = 0;
@@ -43,7 +40,7 @@ export function init(sessionName){
         });
     });
 
-    updateIndex((console.error('Implement checking of active recording.')!=null) ? 0 : imgData.length-1);
+    updateIndex(await window.pywebview.api.recording_active(sessionName) ? imgData.length-1 : 0);
     setTimeout(() => {carousel.scrollTo({left: window.innerHeight * (imgIdx*6 - 6)/100, behavior: 'smooth'})}, 100);
 
     const previousButton = document.getElementById("img-back");
@@ -67,15 +64,12 @@ export function init(sessionName){
         carousel.scrollTo({ left: window.innerHeight * (imgIdx*6 - 6)/100, behavior: 'smooth' });
     });
 
-    document.getElementById('path-display').addEventListener('click', function() {
-        console.error('Implement path renaming.');
-    });
-
-    document.getElementById('delete-button').addEventListener('click', function() {
+    document.getElementById('delete-button').addEventListener('click', async function() {
+        if(await window.pywebview.api.recording_active(sessionName)){ return; }
         const deleteDialog = document.getElementById("delete-dialog");
         deleteDialog.showModal();
         document.getElementById("delete-confirm").addEventListener('click', () => {
-            console.error('Implement gallery deletion.');
+            window.pywebview.api.delete_gallery(sessionName);
             navigate("session", sessionName);
         })
         document.getElementById("delete-cancel").addEventListener('click', () => {

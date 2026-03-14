@@ -31,12 +31,12 @@ export async function loadPath(name, type='directory') {
 
     if(type==="setup"){
         name="setup";
-        fullPath = "C:/User/Screenlapse"; console.error ("Implement getting default path.");
+        fullPath = await window.pywebview.api.get_exec_dir();
     } else if(type==="home"){
-        fullPath = "C:/User/LapseRecordings"; console.error ("Implement getting home path.");
+        fullPath = await window.pywebview.api.get_recordings_dir();
         name = fullPath.substring(fullPath.lastIndexOf('/')+1);
     } else{
-        fullPath = "C:/User/LapseRecordings/" + name; console.error ("Implement getting home path.");
+        fullPath = await window.pywebview.api.get_recordings_dir(); + name;
     }
 
     if(name.length > 14){
@@ -45,7 +45,7 @@ export async function loadPath(name, type='directory') {
     } else{
         document.getElementById("dir-name").textContent = name;
     }
-    console.error ("Implement full path fetching server-side.");
+    
     document.getElementById("full-path").textContent = fullPath;
     document.getElementById("full-path").setAttribute("title", fullPath);
 }
