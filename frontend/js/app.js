@@ -12,7 +12,7 @@ const routes = {
 
 export async function loadPageWithTransition(name, params = {}) {
     if(!document.startViewTransition){ loadPage(name, params); return; }
-    else{ document.startViewTransition(loadPage(name, params)); }
+    else{ document.startViewTransition(() => loadPage(name, params)); }
 }
 
 async function loadPage(name, params={}) {

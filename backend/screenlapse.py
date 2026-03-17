@@ -2,7 +2,10 @@ import pyautogui
 import time
 import os
 import argparse
-from . import compiler
+try:
+    from . import compiler
+except ImportError:
+    import compiler
 
 
 def run(interval_minutes, base_dir=None, runtime_hours=5.0, dirname="output", screen_region:tuple[int,int,int,int]|None=None, compression_scale:float=1, compile_on_completion=False):
@@ -39,12 +42,12 @@ def run(interval_minutes, base_dir=None, runtime_hours=5.0, dirname="output", sc
             previous_interval = current_interval
             print(f"Successfully wrote screenshot {file_name} to {output_dir}.")
 
-        time.sleep(10)
+        time.sleep(interval_minutes * 3)
 
     print(f"\033[32mFinished recording timelapse. {previous_interval + 1} screenshots taken.\033[0m")
 
     if compile_on_completion:
-        compiler.compile(dirname, base_dir=base_dir)
+        compiler.compile(os.path.dirname(output_dir), base_dir=base_dir)
 
 
 def main():

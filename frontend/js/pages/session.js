@@ -6,23 +6,10 @@ import { getCurPage } from "../utils.js";
 export async function init(sessionName){
     const controlContainer = document.getElementById("control-container");
     controlContainer.textContent = '←';
-    controlContainer.addEventListener('click', function() {
-        if(getCurPage().substring(0,8)!='session') return;
-        clearInterval(videoChecker);
-        clearInterval(galleryChecker);
-        navigate("home", null);
-    })
-
-    let galleryExists = false;
-    async function checkGalleryExists(){
-        galleryExists = (await window.pywebview.api.get_num_images(sessionName) > 0);
-        if(!galleryExists){ document.getElementById("gallery-container").style.visibility = 'hidden'; } 
-        else{ document.getElementById("gallery-container").style.visibility = 'visible';}
+    function goBack() {
+        cleanupAndNavigate("home", null);
     }
-    checkGalleryExists();
-    const galleryChecker = setInterval(async () => {
-        checkGalleryExists();
-    }, 2000);
+    controlContainer.addEventListener('click', goBack, {once: true});
 
     let videoCompiled = false;
     async function checkVideoCompiled(){
@@ -37,14 +24,12 @@ export async function init(sessionName){
 
     const thumbnailImage = await window.pywebview.api.get_thumbnail(sessionName);
     document.querySelectorAll('img').forEach((element, index) => {
-        element.src = thumbnailImage;
+        element.src = `${thumbnailImage}/thumbnail?height=150&width=262`;
     })
 
     document.querySelectorAll('.hover-highlighter').forEach((element, index) => {
         element.addEventListener('click', function() {
-            clearInterval(videoChecker);
-            clearInterval(galleryChecker);
-            navigate(element.id, sessionName);
+            cleanupAndNavigate(element.id, sessionName);
         });
     });
 
@@ -54,9 +39,7 @@ export async function init(sessionName){
         deleteDialog.showModal();
         document.getElementById("delete-confirm").addEventListener('click', async () => {
             await window.pywebview.api.delete_session(sessionName);
-            clearInterval(videoChecker);
-            clearInterval(galleryChecker);
-            navigate("home", null);
+            cleanupAndNavigate("home", null);
         })
         document.getElementById("delete-cancel").addEventListener('click', () => {
             deleteDialog.close();
@@ -88,17 +71,26 @@ export async function init(sessionName){
             durationInput.value = parseFloat((gallerySize / newFPS).toFixed(2));
         });
 
+        let compileConfirming = 0;
         document.getElementById("compile-confirm").addEventListener('click', () => {
-            
+            if(compileConfirming > 0){ return; }
+            compileConfirming++;
             const fps = document.getElementById("video-fps").value;
             const duration = document.getElementById("video-duration").value;
             const deleteGallery = document.getElementById("delete-imgs-finish").checked;
 
             window.pywebview.api.start_compiling(sessionName, fps, duration, deleteGallery);
             compileDialog.close();
+            compileConfirming--;
         });
         document.getElementById("compile-cancel").addEventListener('click', () => {
             compileDialog.close();
         });
     })
+
+    function cleanupAndNavigate(route, params){
+        controlContainer.removeEventListener('click', goBack);
+        clearInterval(videoChecker);
+        navigate(route, params);
+    }
 }

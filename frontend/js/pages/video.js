@@ -6,10 +6,10 @@ import { getCurPage } from "../utils.js";
 export async function init(sessionName){
     const controlContainer = document.getElementById("control-container");
     controlContainer.textContent = '←';
-    controlContainer.addEventListener('click', function() {
-        if(getCurPage().substring(0,5)!='video') return;
-        navigate("session", sessionName);
-    })
+    function goBack() {
+        cleanupAndNavigate("session", sessionName);
+    }
+    controlContainer.addEventListener('click', goBack, {once: true});
 
     const videoDisplay = document.getElementById("video-display");
     videoDisplay.src = await window.pywebview.api.get_video(sessionName);
@@ -51,10 +51,15 @@ export async function init(sessionName){
         deleteDialog.showModal();
         document.getElementById("delete-confirm").addEventListener('click', () => {
             window.pywebview.api.delete_video(sessionName);
-            navigate("session", sessionName);
+            cleanupAndNavigate("session", sessionName);
         })
         document.getElementById("delete-cancel").addEventListener('click', () => {
             deleteDialog.close();
         })
     });
+
+    function cleanupAndNavigate(route, params){
+        controlContainer.removeEventListener('click', goBack);
+        navigate(route, params);
+    }
 }

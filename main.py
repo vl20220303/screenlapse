@@ -3,7 +3,7 @@ import os, send2trash
 import datetime
 import json
 from pathlib import Path
-from flask import Flask, send_from_directory, abort
+from flask import Flask, request, send_file, send_from_directory, abort
 from waitress import serve
 import threading
 import socket
@@ -11,11 +11,16 @@ import socket
 from backend import screenlapse
 from backend import compiler
 
+from functools import lru_cache
+from PIL import Image, ImageOps
+import io, base64
+
 class API:
     def __init__(self):
         self._settings_path = Path.cwd() / ".screenlapse-settings.json"
         self.inited, self.settings = self.load_settings()
         self.active_recordings = []
+        self.active_jobs = {'r':{}, 'c':{}, 'd':{}}
 
     # init
     def setup_required(self):
@@ -25,7 +30,7 @@ class API:
         return str(Path.cwd())
         
     def get_recordings_dir(self):
-        return self.settings.get("recordings_dir", None)
+        return self.settings.get("recordings_dir", "")
     
     def get_theme(self):
         return self.settings.get("theme", None)
@@ -41,6 +46,7 @@ class API:
 
     def save_recordings_dir(self, path):
         self.settings["recordings_dir"] = path
+        get_cached_thumbnail.cache_clear()
         self.save_settings()
         return True
     
@@ -75,7 +81,7 @@ class API:
 
     def get_images(self, session_name):
         base = Path(self.settings["recordings_dir"]) / session_name
-        images = sorted(base.glob("*.png"))
+        images = sorted(base.glob("*.png"), key=int_keyed_file)
         return [self.get_media_url(session_name, img.name) for img in images]
     
     def get_thumbnail(self, session_name):
@@ -90,12 +96,14 @@ class API:
 
     def get_media_url(self, session_name, filename):
         return f"/media/{session_name}/{filename}"
+    
+    def get_active_jobs(self):
+        return self.active_jobs
 
     # checks
     def get_num_images(self, session_name):
         base = Path(self.settings["recordings_dir"]) / session_name
-        images = base.glob("*.png")
-        return len(list(images))
+        return sum(1 for _ in base.glob("*.png"))
 
     def video_already_compiled(self, session_name):
         base = Path(self.settings["recordings_dir"]) / session_name
@@ -114,38 +122,49 @@ class API:
         if compression is not None: compression = float(compression)
 
         def recorderFunction():
-            self.active_recordings.append(name)
+            new_name = str(name)
+            proposed_dir = Path(self.get_recordings_dir()) / new_name
+            version = 1
+            while proposed_dir.exists():
+                new_name = f'{str(name)}({version})'
+                proposed_dir = Path(self.get_recordings_dir()) / f"{name}({version})"
+                version += 1
+
+            self.active_recordings.append(new_name)
+            print(self.active_jobs)
+            self.active_jobs['r'][name] = f"Writing screenshots to {new_name} every {interval} minutes for {duration} hours (Started {datetime.datetime.now().strftime("%B %d, %Y, %I:%M:%S %p")})"
             screenlapse.run(
                 interval_minutes=interval, 
                 base_dir=self.get_recordings_dir(), 
                 runtime_hours=duration, 
-                dirname=name, 
+                dirname=new_name, 
                 screen_region=region, 
                 compression_scale=compression, 
                 compile_on_completion=compile
             )
-            self.active_recordings.remove(name)
+            self.active_jobs['r'].pop(name, None)
+            self.active_recordings.remove(new_name)
             
-        recorderThread = threading.Thread(
-            target = recorderFunction, daemon=True
-        )
+        recorderThread = threading.Thread(target = recorderFunction, daemon=True)
         recorderThread.start()
         return True
     
     def start_compiling(self, session_name, fps, duration, delete_gallery):
         if fps is not None: fps = float(fps)
         else: return
-        if duration is not None: duration = float(duration)
-        else: return
-        compilerThread = threading.Thread(
-            target =
+        def compilerFunction():
+            self.active_jobs['c'][session_name] = f"Compiling video for {session_name} (Started {datetime.datetime.now().strftime("%B %d, %Y, %I:%M:%S %p")})"
+            if(delete_gallery):
+                self.active_jobs['d'][session_name] = f"Deleting gallery of {session_name} (Started {datetime.datetime.now().strftime("%B %d, %Y, %I:%M:%S %p")})"
             compiler.compile(
-                dirname=session_name, 
+                dirname=session_name,
                 base_dir=self.get_recordings_dir(),
-                fps=fps, video_duration=duration,
+                fps=fps,
                 delete_imgs=delete_gallery
-            ), daemon = True
-        )
+            )
+            self.active_jobs['c'].pop(session_name, None)
+            self.active_jobs['d'].pop(session_name, None)
+        compilerThread = threading.Thread(target = compilerFunction, daemon = True)
         compilerThread.start()
         return True
 
@@ -159,8 +178,11 @@ class API:
 
     def delete_gallery(self, session_name):
         base = Path(self.settings["recordings_dir"]) / session_name
-        for image in base.glob("*.png"):
+        self.active_jobs['d'][session_name] = f"Deleting gallery of {session_name} (Started {datetime.datetime.now().strftime("%B %d, %Y, %I:%M:%S %p")})"
+        for idx, image in enumerate(base.glob("*.png")):
+            if(idx==0): continue
             send2trash.send2trash(image)
+        self.active_jobs['d'].pop(session_name, None)
     
     def delete_video(self, session_name):
         base = Path(self.settings["recordings_dir"]) / session_name
@@ -168,11 +190,30 @@ class API:
         if video is not None:
             send2trash.send2trash(video)
 
+# utils
 
 def get_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(('127.0.0.1', 0))
         return s.getsockname()[1]
+    
+def int_keyed_file(filename):
+    basename = os.path.basename(filename)
+    basename = basename[:-4]
+    return int(basename)
+
+@lru_cache(maxsize=100)
+def get_cached_thumbnail(recordings_dir, session, filename, size=(100, 100)):
+    file_path = Path(recordings_dir) / session / filename
+    if not file_path.exists(): return None
+    try:
+        with Image.open(file_path) as img:
+            img = ImageOps.fit(img, size, Image.Resampling.BICUBIC)
+            buffer = io.BytesIO()
+            img.save(buffer, format="WEBP", quality=90)
+            return buffer.getvalue()
+    except Exception:
+        return None
 
 def start():
 
@@ -190,7 +231,15 @@ def start():
         session_path = Path(recordings_dir) / session
         if not session_path.exists():
             abort(404)
-        return send_from_directory(session_path, filename)
+        return send_from_directory(session_path, filename, conditional=True)
+    
+    @app.route('/media/<session>/<filename>/thumbnail')
+    def serve_thumbnails(session, filename):
+        width = request.args.get('width', 100, type=int); height = request.args.get('height', 100, type=int)
+        img_bytes = get_cached_thumbnail(api.get_recordings_dir(), session, filename, size=(width, height))
+        if not img_bytes:
+            abort(404)
+        return send_file(io.BytesIO(img_bytes), mimetype='image/webp')
 
     @app.route('/')
     def index():
@@ -203,7 +252,7 @@ def start():
         return send_from_directory(frontend_dir, filename)
 
     def run_server():
-        serve(app, host='127.0.0.1', port=port, threads=2)
+        serve(app, host='127.0.0.1', port=port, threads=4)
 
     window = webview.create_window(
         title="Screenlapse",
@@ -217,7 +266,7 @@ def start():
     server_thread = threading.Thread(target=run_server, daemon=True)
     server_thread.start()
 
-    webview.start(gui="gtk", debug=False)
+    webview.start(gui="gtk", debug=True)
 
 if __name__ == "__main__":
     start()

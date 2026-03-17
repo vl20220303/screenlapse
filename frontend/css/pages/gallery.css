@@ -28,7 +28,7 @@
 }
 
 #carousel{
-    height: 10vh; width: 70vh;
+    height: 10vh; width: 50vh;
     margin-top: 5vh;
     overflow-x: scroll; overflow-y: hidden;
     display: flex; flex-direction: row; align-items: center;

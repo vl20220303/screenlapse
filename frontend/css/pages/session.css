@@ -83,7 +83,7 @@
 
 #delete-dialog{
     align-self: center; justify-self: center;
-    height: 255px; width: 300px; background-color: var(--item-color); border-radius: 10px;
+    height: 200px; width: 300px; background-color: var(--item-color); border-radius: 10px;
     box-shadow: 0 0 20px 5px black; border-style: none;
 }
 #delete-dialog::backdrop{

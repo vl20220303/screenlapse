@@ -20,20 +20,35 @@ export async function init(){
         await window.pywebview.api.save_preferred_theme(value);
         setTheme(value);
     }
-
     let idx = reverseThemeAttributes[await window.pywebview.api.get_theme()];
-
     controlContainerSetTheme(idx);
-    controlContainer.addEventListener('click', function() {
+    function updateTheme(){
         if(getCurPage()!='home') return;
         idx = (idx+1)%3;
         controlContainerSetTheme(idx);
-    })
+    }
+    controlContainer.addEventListener('click', updateTheme);
+
+
+    const pathDisplay = document.getElementById('path-display');
+    let updatingPath = 0;
+    async function updateDirPath() {
+        if(updatingPath > 0) return;
+        updatingPath++;
+        const newPath = await window.pywebview.api.choose_directory();
+        if(!newPath){ 
+            updatingPath--;
+            pathDisplay.addEventListener('click', updateDirPath, {once: true});
+            return;
+        }
+        await window.pywebview.api.save_recordings_dir(newPath);
+        cleanupAndNavigate("home", null);
+    }
+    pathDisplay.addEventListener('click', updateDirPath, {once: true});
+
 
     const sessionsContainer = document.getElementById("sessions-container");
-
     let sessionsData = await window.pywebview.api.get_sessions();
-    sessionsData.sort((a, b) => b.sessionDate.localeCompare(a.sessionDate));
 
     function renderSessions() {
         let sessionsHTML = "";
@@ -41,7 +56,7 @@ export async function init(){
             sessionsHTML += 
                 `<div class="session-container" title="${element.sessionName} Last Modified: ${element.sessionDate}">
                     <div class="hover-highlighter" id="${element.sessionName}"></div>
-                    <img src=${element.sessionImg} no-highlight></img>
+                    <img src="${element.sessionImg}/thumbnail?height=105&width=105" no-highlight></img>
                     <div class="descriptor-container">
                         <h1>${element.sessionName}</h1>
                         <p>${element.sessionDate}</p>
@@ -51,8 +66,7 @@ export async function init(){
         sessionsContainer.innerHTML = sessionsHTML;
         sessionsContainer.querySelectorAll('.hover-highlighter').forEach((element, index) => {
             element.addEventListener("click", function() {
-                clearInterval(checker);
-                navigate("session", element.id);
+                cleanupAndNavigate("session", element.id);
             });
         });
     }
@@ -78,21 +92,15 @@ export async function init(){
 
     const checker = setInterval(async () => {
         const newSessionsData = await window.pywebview.api.get_sessions();
-        sessionsData = newSessionsData;
-        reRenderSessions();
+        const dataChanged = 
+            newSessionsData.length !== sessionsData.length || 
+            newSessionsData.some((newSession, i) => {
+                const session = sessionsData[i];
+                return newSession.sessionName !== session.sessionName || 
+                       newSession.sessionDate !== session.sessionDate;
+        });
+        if (dataChanged) { sessionsData = newSessionsData; reRenderSessions(); }
     }, 2500);
-
-
-    const pathDisplay = document.getElementById('path-display');
-    async function updateDirPath() {
-        pathDisplay.removeEventListener('click', updateDirPath);
-        const newPath = await window.pywebview.api.choose_directory();
-        if(!newPath) return;
-        await window.pywebview.api.save_recordings_dir(newPath);
-        clearInterval(checker);
-        navigate("home", null);
-    }
-    pathDisplay.addEventListener('click', updateDirPath);
 
 
     document.getElementById('new-button').addEventListener('click', function() {
@@ -114,28 +122,34 @@ export async function init(){
             regionIndicator.style.left = `${left}%`; regionIndicator.style.top = `${top}%`;
             regionIndicator.style.width = `${width}%`; regionIndicator.style.height = `${height}%`;
             regionIndicator.style.visibility = 'visible';
-            
         })
-        
-        let confirmingRecording = 0;
-        document.getElementById("record-confirm").addEventListener('click', async () => {
-            if(confirmingRecording!=0){ return; }
-            
-            const interval = document.getElementById("capture-interval").value;
-            const duration = document.getElementById("capture-duration").value;
-            const compression = document.getElementById("capture-compression").value;
-            const name = document.getElementById("capture-name").value;
-            const compile = document.getElementById("compile-video-finish").checked;
-
-            if(!name){ console.log(interval); return; }
-
-            confirmingRecording++;
-            window.pywebview.api.start_recording(interval, duration, name, null, compression, compile);
-            recordDialog.close();
-            confirmingRecording--;
-        });
-        document.getElementById("record-cancel").addEventListener('click', () => {
-            recordDialog.close();
-        });
     })
+    let confirmingRecording = 0;
+    document.getElementById("record-confirm").addEventListener('click', () => {
+        if(confirmingRecording!=0){ return; }
+        
+        const interval = document.getElementById("capture-interval").value;
+        const duration = document.getElementById("capture-duration").value;
+        const compression = document.getElementById("capture-compression").value;
+        const name = document.getElementById("capture-name").value;
+        const compile = document.getElementById("compile-video-finish").checked;
+
+        if(!name){ return; }
+
+        confirmingRecording++;
+        window.pywebview.api.start_recording(interval, duration, name, null, compression, compile);
+        document.getElementById("new-dialog").close();
+        confirmingRecording--;
+    });
+    document.getElementById("record-cancel").addEventListener('click', () => {
+        document.getElementById("new-dialog").close();
+    });
+
+    function cleanupAndNavigate(route, params){
+        controlContainer.removeEventListener('click', updateTheme);
+        pathDisplay.removeEventListener('click', updateDirPath);
+        sessionsData = null;
+        clearInterval(checker);
+        navigate(route, params);
+    }
 }
