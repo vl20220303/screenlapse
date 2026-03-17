@@ -1,5 +1,6 @@
 #app{
     visibility: visible;
+    display: flex;
 }
 
 #control-container:hover{
@@ -7,11 +8,11 @@
 }
 
 #container{
-    height: 100%; width: 99%; margin: 0; padding: 20px;
-    align-self: center; justify-self: center;
+    height: 100%; margin: 0; padding: 20px;
+    justify-self: self-start; flex: 1 0;
     display: flex; flex-direction: column;
-    background-color: rgb(20, 20, 20); color: rgb(240, 240, 240);
-    font-size: 15px; font-weight: lighter; line-height: 15px; font-family: monospace, sans-serif;
+    background-color: rgb(10, 10, 10); color: rgb(240, 240, 240);
+    font-size: 15px; font-weight: 500; line-height: 15px; font-family: 'Consolas', monospace;
     overflow-wrap: anywhere;
 }
 

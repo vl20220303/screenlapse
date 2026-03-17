@@ -12,24 +12,27 @@
 }
 
 #header-buttons-container{
-    height: 120px; width: 100%; margin: 0; padding: 0;
+    width: 100%; margin: 0;
     display: flex; flex-direction: row; overflow: visible; overscroll-behavior: none;
+    justify-content: flex-end;
 }
 
 #jobs-button{
-    height: 40px; width: 115px; margin: 0; padding: 3px; border-radius: 5px;
-    margin-top: 30px; margin-right: 40px; margin-left: auto;
-    color: var(--text-color); background-color: var(--item-color);
-    font-family: 'Segoe UI', 'SF Pro', Verdana, Arial, sans-serif; font-weight: 400; font-size: 15px;
-    border: none;
+    height: 40px; width: 50px; margin: 0; padding: 3px; border-radius: 5px;
+    margin-top: 30px; margin-right: 20px;
+    color: var(--text-color-secondary); background-color: var(--background-color);
+    font-family: Arial; font-size: 15px;
+    border: 1px solid var(--item-color);
 }
 #jobs-button:hover{
+    background-color: black; color: rgb(0, 255, 0); border: none;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 #sorter{
     height: 40px; width: 115px; margin: 0; padding: 3px; border-radius: 5px;
-    margin-top: 30px; margin-right: 40px; margin-left: auto;
+    margin-top: 30px; margin-right: 40px;
     color: var(--text-color); background-color: var(--item-color);
     font-family: 'Segoe UI', 'SF Pro', Verdana, Arial, sans-serif; font-weight: 400; font-size: 15px;
     border: none;

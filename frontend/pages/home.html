@@ -1,13 +1,15 @@
 <link rel="stylesheet" href="..\css\pages\home.css">
 <div id="container">
-    <button id="jobs-button">🗖</button>
-    <select id="sorter">
-        <option value="default" disabled selected hidden>Sort by ...</option>
-        <option value="nameA">Name (A-Z)</option>
-        <option value="nameZ">Name (Z-A)</option>
-        <option value="date0">Date (Latest)</option>
-        <option value="date9">Date (Oldest)</option>
-    </select>
+    <div id="header-buttons-container">
+        <button id="jobs-button">🗖</button>
+        <select id="sorter">
+            <option value="default" disabled selected hidden>Sort by ...</option>
+            <option value="nameA">Name (A-Z)</option>
+            <option value="nameZ">Name (Z-A)</option>
+            <option value="date0">Date (Latest)</option>
+            <option value="date9">Date (Oldest)</option>
+        </select>
+    </div>
     <div id="sessions-container">
         Fetching recordings...
     </div>

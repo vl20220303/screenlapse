@@ -77,6 +77,7 @@ export async function init(){
     })
 
     function reRenderSessions() {
+        const scroll = document.getElementById("container").scrollTop;
         if(sorter.value=="nameA"){
             sessionsData.sort((a, b) => a.sessionName.localeCompare(b.sessionName));
         } else if(sorter.value=="nameZ"){
@@ -87,6 +88,7 @@ export async function init(){
             sessionsData.sort((a, b) => a.sessionDate.localeCompare(b.sessionDate));
         }
         renderSessions();
+        document.getElementById("container").scrollTop = scroll;
     }
 
     const checker = setInterval(async () => {
