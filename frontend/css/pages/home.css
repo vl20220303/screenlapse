@@ -11,6 +11,22 @@
     display: flex; flex-direction: column; overflow: auto; overscroll-behavior: none;
 }
 
+#header-buttons-container{
+    height: 120px; width: 100%; margin: 0; padding: 0;
+    display: flex; flex-direction: row; overflow: visible; overscroll-behavior: none;
+}
+
+#jobs-button{
+    height: 40px; width: 115px; margin: 0; padding: 3px; border-radius: 5px;
+    margin-top: 30px; margin-right: 40px; margin-left: auto;
+    color: var(--text-color); background-color: var(--item-color);
+    font-family: 'Segoe UI', 'SF Pro', Verdana, Arial, sans-serif; font-weight: 400; font-size: 15px;
+    border: none;
+}
+#jobs-button:hover{
+    cursor: pointer;
+}
+
 #sorter{
     height: 40px; width: 115px; margin: 0; padding: 3px; border-radius: 5px;
     margin-top: 30px; margin-right: 40px; margin-left: auto;

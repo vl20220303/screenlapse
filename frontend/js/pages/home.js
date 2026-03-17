@@ -3,7 +3,6 @@ import { setTheme, getCurPage } from "../utils.js";
 import { navigate } from "../app.js";
 
 export async function init(){
-    
     const controlContainer = document.getElementById("control-container");
     const themeAttributes = [
         ["light-theme", "light"],
@@ -102,6 +101,9 @@ export async function init(){
         if (dataChanged) { sessionsData = newSessionsData; reRenderSessions(); }
     }, 2500);
 
+    document.getElementById('jobs-button').addEventListener('click', function() {
+        cleanupAndNavigate("jobs", null);
+    })
 
     document.getElementById('new-button').addEventListener('click', function() {
         const recordDialog = document.getElementById("new-dialog");

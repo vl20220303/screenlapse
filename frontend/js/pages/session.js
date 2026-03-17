@@ -1,7 +1,6 @@
 "use strict";
 
 import { navigate } from "../app.js";
-import { getCurPage } from "../utils.js";
 
 export async function init(sessionName){
     const controlContainer = document.getElementById("control-container");

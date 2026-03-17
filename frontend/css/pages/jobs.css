@@ -1,0 +1,38 @@
+#app{
+    visibility: visible;
+}
+
+#control-container:hover{
+    cursor: pointer;
+}
+
+#container{
+    height: 100%; width: 99%; margin: 0; padding: 20px;
+    align-self: center; justify-self: center;
+    display: flex; flex-direction: column;
+    background-color: rgb(20, 20, 20); color: rgb(240, 240, 240);
+    font-size: 15px; font-weight: lighter; line-height: 15px; font-family: monospace, sans-serif;
+    overflow-wrap: anywhere;
+}
+
+#container h1{
+    font-size: 20px;
+    margin-block: 10px;
+}
+
+#container h2{
+    font-size: 17px;
+    margin-block: 10px;
+}
+
+#recorders{
+    color: rgb(0, 255, 0);
+}
+
+#compilers{
+    color: rgb(255, 255, 0);
+}
+
+#deleters{
+    color: rgb(255, 0, 0);
+}

@@ -44,7 +44,7 @@ export async function init(sessionName){
     const lazyLoader = new IntersectionObserver((entries, observer) => {
         entries.forEach(async entry => {
             if (entry.isIntersecting){
-                entry.target.src = `${imgData[entry.target.getAttribute('idx')]}/thumbnail`;
+                entry.target.src = `${imgData[entry.target.getAttribute('idx')]}/thumbnail?height=100&width=100`;
             } else{
                 entry.target.src = "../resources/black.webp";
             }

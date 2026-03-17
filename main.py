@@ -97,8 +97,12 @@ class API:
     def get_media_url(self, session_name, filename):
         return f"/media/{session_name}/{filename}"
     
-    def get_active_jobs(self):
-        return self.active_jobs
+    def get_active_recordings(self):
+        return list(self.active_jobs['r'].values())
+    def get_active_compilations(self):
+        return list(self.active_jobs['c'].values())
+    def get_active_deletions(self):
+        return list(self.active_jobs['d'].values())
 
     # checks
     def get_num_images(self, session_name):
@@ -131,7 +135,6 @@ class API:
                 version += 1
 
             self.active_recordings.append(new_name)
-            print(self.active_jobs)
             self.active_jobs['r'][name] = f"Writing screenshots to {new_name} every {interval} minutes for {duration} hours (Started {datetime.datetime.now().strftime("%B %d, %Y, %I:%M:%S %p")})"
             screenlapse.run(
                 interval_minutes=interval, 
@@ -139,11 +142,13 @@ class API:
                 runtime_hours=duration, 
                 dirname=new_name, 
                 screen_region=region, 
-                compression_scale=compression, 
-                compile_on_completion=compile
+                compression_scale=compression
             )
             self.active_jobs['r'].pop(name, None)
             self.active_recordings.remove(new_name)
+
+            if(compile):
+                self.start_compiling(new_name, 20, 1, False)
             
         recorderThread = threading.Thread(target = recorderFunction, daemon=True)
         recorderThread.start()

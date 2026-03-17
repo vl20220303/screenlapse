@@ -43,6 +43,7 @@ export async function init(){
     const folderBrowseButton = document.getElementById("browse-button");
     folderBrowseButton.addEventListener("click", async () => {
         const newPath = await window.pywebview.api.choose_directory();
+        if(!newPath){ return; }
         pathDisplay.value = newPath;
     });
 

@@ -5,6 +5,7 @@ import { setCurPage } from "./utils.js";
 const routes = {
     setup: () => {loadPageWithTransition("setup"); loadPath("setup", "setup")},
     home: () => {loadPageWithTransition("home"); loadPath("home", "home")},
+    jobs: () => {loadPageWithTransition("jobs"); loadPath("jobs", "jobs")},
     session: (sessionName) => {loadPageWithTransition("session", sessionName ); loadPath(sessionName)},
     gallery: (sessionName) => {loadPageWithTransition("gallery", sessionName); loadPath(sessionName)},
     video: (sessionName) => {loadPageWithTransition("video", sessionName); loadPath(sessionName)}
@@ -35,6 +36,9 @@ export async function loadPath(name, type='directory') {
     } else if(type==="home"){
         fullPath = await window.pywebview.api.get_recordings_dir();
         name = fullPath.substring(fullPath.lastIndexOf('/')+1);
+    } else if(type=="jobs"){
+        name="jobs"
+        fullPath = await window.pywebview.api.get_recordings_dir();
     } else{
         fullPath = await window.pywebview.api.get_recordings_dir(); + name;
     }
