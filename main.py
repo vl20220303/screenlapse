@@ -46,7 +46,7 @@ class API:
 
     def save_recordings_dir(self, path):
         self.settings["recordings_dir"] = path
-        get_cached_thumbnail.cache_clear()
+        get_thumbnail.cache_clear()
         self.save_settings()
         return True
     
