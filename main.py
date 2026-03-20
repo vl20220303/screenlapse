@@ -207,18 +207,21 @@ def int_keyed_file(filename):
     basename = basename[:-4]
     return int(basename)
 
-@lru_cache(maxsize=100)
 def get_cached_thumbnail(recordings_dir, session, filename, size=(100, 100)):
-    file_path = Path(recordings_dir) / session / filename
-    if not file_path.exists(): return None
     try:
-        with Image.open(file_path) as img:
-            img = ImageOps.fit(img, size, Image.Resampling.BICUBIC)
-            buffer = io.BytesIO()
-            img.save(buffer, format="WEBP", quality=90)
-            return buffer.getvalue()
+        return get_thumbnail(recordings_dir, session, filename, size=size)
     except Exception:
         return None
+
+@lru_cache(maxsize=100)
+def get_thumbnail(recordings_dir, session, filename, size=(100, 100)):
+    file_path = Path(recordings_dir) / session / filename
+
+    with Image.open(file_path) as img:
+        img = ImageOps.fit(img, size, Image.Resampling.BICUBIC)
+        buffer = io.BytesIO()
+        img.save(buffer, format="WEBP", quality=90)
+        return buffer.getvalue()
 
 def start():
 
