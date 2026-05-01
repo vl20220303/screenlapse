@@ -2,6 +2,7 @@
 
 import { navigate } from "../app.js";
 import { getCurPage } from "../utils.js";
+import { REFRESH_TOKEN } from "../init.js";
 
 export async function init(sessionName){
     const controlContainer = document.getElementById("control-container");
@@ -50,7 +51,7 @@ export async function init(sessionName){
         const deleteDialog = document.getElementById("delete-dialog");
         deleteDialog.showModal();
         document.getElementById("delete-confirm").addEventListener('click', () => {
-            window.pywebview.api.delete_video(sessionName);
+            window.pywebview.api.delete_video(sessionName, pywebview.api.get_access_token(REFRESH_TOKEN));
             cleanupAndNavigate("session", sessionName);
         })
         document.getElementById("delete-cancel").addEventListener('click', () => {

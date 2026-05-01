@@ -7,11 +7,12 @@ from flask import Flask, request, send_file, send_from_directory, abort
 from waitress import serve
 import threading
 import socket
+import secrets
 
 from backend import screenlapse
 from backend import compiler
 
-from functools import lru_cache
+from functools import lru_cache, wraps
 from PIL import Image, ImageOps
 import io, base64
 
@@ -21,6 +22,8 @@ class API:
         self.inited, self.settings = self.load_settings()
         self.active_recordings = []
         self.active_jobs = {'r':{}, 'c':{}, 'd':{}}
+        self.refresh_token = secrets.token_hex(16); self.refresh_token_reads = 0
+        self.access_token = secrets.token_hex(16); self.access_token_creation = datetime.datetime.now()
 
     # init
     def setup_required(self):
@@ -117,7 +120,9 @@ class API:
         return session_name in self.active_recordings
     
     # actions
-    def start_recording(self, interval, duration, name, region, compression, compile):
+    def start_recording(self, interval, duration, name, region, compression, compile, access_token):
+        if access_token != self.access_token: return
+        
         if interval is not None: interval = float(interval)
         else: return
         if duration is not None: duration = float(duration)
@@ -148,13 +153,15 @@ class API:
             self.active_recordings.remove(new_name)
 
             if(compile):
-                self.start_compiling(new_name, 20, 1, False)
+                self.start_compiling(new_name, 20, 1, False, self.get_access_token(self.refresh_token))
             
         recorderThread = threading.Thread(target = recorderFunction, daemon=True)
         recorderThread.start()
         return True
     
-    def start_compiling(self, session_name, fps, duration, delete_gallery):
+    def start_compiling(self, session_name, fps, duration, delete_gallery, access_token):
+        if access_token != self.access_token: return
+        
         if fps is not None: fps = float(fps)
         else: return
         def compilerFunction():
@@ -174,14 +181,18 @@ class API:
         return True
 
     
-    def delete_session(self, session_name):
+    def delete_session(self, session_name, access_token):
+        if access_token != self.access_token: return False
+        
         folder = Path(self.settings["recordings_dir"]) / session_name
         try:
             send2trash.send2trash(folder); return True
         except:
             return False
 
-    def delete_gallery(self, session_name):
+    def delete_gallery(self, session_name, access_token):
+        if access_token != self.access_token: return
+        
         base = Path(self.settings["recordings_dir"]) / session_name
         self.active_jobs['d'][session_name] = f"Deleting gallery of {session_name} (Started {datetime.datetime.now().strftime("%B %d, %Y, %I:%M:%S %p")})"
         for idx, image in enumerate(base.glob("*.png")):
@@ -189,11 +200,24 @@ class API:
             send2trash.send2trash(image)
         self.active_jobs['d'].pop(session_name, None)
     
-    def delete_video(self, session_name):
+    def delete_video(self, session_name, access_token):
+        if access_token != self.access_token: return
+        
         base = Path(self.settings["recordings_dir"]) / session_name
         video = next(base.glob("*.mp4"), None)
         if video is not None:
             send2trash.send2trash(video)
+
+    # auth
+    def get_refresh_token(self):
+        self.refresh_token_reads+=1
+        return self.refresh_token if self.refresh_token_reads == 1 else None
+    
+    def get_access_token(self, refresh_token):
+        if datetime.datetime.now() - self.access_token_creation > datetime.timedelta(minutes=5):
+            self.access_token = secrets.token_hex(16)
+            self.access_token_creation = datetime.datetime.now()
+        return self.access_token if refresh_token == self.refresh_token else None
 
 # utils
 
@@ -231,7 +255,19 @@ def start():
     port = get_free_port()
     url = f"http://127.0.0.1:{port}/"
 
+    session_token = secrets.token_hex(16)
+
+    def require_access_token(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            token = request.cookies.get("LONG_LIVED_TOKEN")
+            if token != session_token:
+                abort(401)
+            return func(*args, **kwargs)
+        return wrapper
+
     @app.route('/media/<session>/<filename>')
+    @require_access_token
     def serve_media(session, filename):
         recordings_dir = api.get_recordings_dir()
         if not recordings_dir:
@@ -242,8 +278,9 @@ def start():
         return send_from_directory(session_path, filename, conditional=True)
     
     @app.route('/media/<session>/<filename>/thumbnail')
+    @require_access_token
     def serve_thumbnails(session, filename):
-        width = request.args.get('width', 100, type=int); height = request.args.get('height', 100, type=int)
+        width = min(request.args.get('width', 100, type=int), 300); height = min(request.args.get('height', 100, type=int), 300)
         img_bytes = get_cached_thumbnail(api.get_recordings_dir(), session, filename, size=(width, height))
         if not img_bytes:
             abort(404)
@@ -252,9 +289,12 @@ def start():
     @app.route('/')
     def index():
         frontend_dir = Path(__file__).parent / "frontend"
-        return send_from_directory(frontend_dir, "index.html")
+        response = send_from_directory(frontend_dir, "index.html")
+        response.set_cookie("LONG_LIVED_TOKEN", session_token, httponly=True)
+        return response
 
     @app.route('/<path:filename>')
+    @require_access_token
     def static_files(filename):
         frontend_dir = Path(__file__).parent / "frontend"
         return send_from_directory(frontend_dir, filename)
@@ -274,7 +314,7 @@ def start():
     server_thread = threading.Thread(target=run_server, daemon=True)
     server_thread.start()
 
-    webview.start(gui="gtk", debug=False)
+    webview.start(gui="gtk", debug=True)
 
 if __name__ == "__main__":
     start()

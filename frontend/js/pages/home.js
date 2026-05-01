@@ -1,6 +1,7 @@
 "use strict";
 import { setTheme, getCurPage } from "../utils.js";
 import { navigate } from "../app.js";
+import { REFRESH_TOKEN } from "../init.js";
 
 export async function init(){
     const controlContainer = document.getElementById("control-container");
@@ -141,7 +142,7 @@ export async function init(){
         if(!name){ return; }
 
         confirmingRecording++;
-        window.pywebview.api.start_recording(interval, duration, name, null, compression, compile);
+        window.pywebview.api.start_recording(interval, duration, name, null, compression, compile, pywebview.api.get_access_token(REFRESH_TOKEN));
         document.getElementById("new-dialog").close();
         confirmingRecording--;
     });

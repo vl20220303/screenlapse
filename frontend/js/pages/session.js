@@ -1,6 +1,7 @@
 "use strict";
 
 import { navigate } from "../app.js";
+import { REFRESH_TOKEN } from "../init.js"
 
 export async function init(sessionName){
     const controlContainer = document.getElementById("control-container");
@@ -37,7 +38,7 @@ export async function init(sessionName){
         const deleteDialog = document.getElementById("delete-dialog");
         deleteDialog.showModal();
         document.getElementById("delete-confirm").addEventListener('click', async () => {
-            await window.pywebview.api.delete_session(sessionName);
+            await window.pywebview.api.delete_session(sessionName, pywebview.api.get_access_token(REFRESH_TOKEN));
             cleanupAndNavigate("home", null);
         })
         document.getElementById("delete-cancel").addEventListener('click', () => {
@@ -78,7 +79,7 @@ export async function init(sessionName){
             const duration = document.getElementById("video-duration").value;
             const deleteGallery = document.getElementById("delete-imgs-finish").checked;
 
-            window.pywebview.api.start_compiling(sessionName, fps, duration, deleteGallery);
+            window.pywebview.api.start_compiling(sessionName, fps, duration, deleteGallery, pywebview.api.get_access_token(REFRESH_TOKEN));
             compileDialog.close();
             compileConfirming--;
         });
