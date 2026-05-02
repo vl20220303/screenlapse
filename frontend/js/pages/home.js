@@ -49,6 +49,7 @@ export async function init(){
 
     const sessionsContainer = document.getElementById("sessions-container");
     let sessionsData = await window.pywebview.api.get_sessions();
+    sessionsData.sort((a, b) => new Date(b.sessionDate) - new Date(a.sessionDate));
 
     function renderSessions() {
         let sessionsHTML = "";
@@ -84,9 +85,11 @@ export async function init(){
         } else if(sorter.value=="nameZ"){
             sessionsData.sort((a, b) => b.sessionName.localeCompare(a.sessionName));
         } else if(sorter.value=="date0"){
-            sessionsData.sort((a, b) => b.sessionDate.localeCompare(a.sessionDate));
+            sessionsData.sort((a, b) => new Date(b.sessionDate) - new Date(a.sessionDate));
         } else if(sorter.value=="date9"){
-            sessionsData.sort((a, b) => a.sessionDate.localeCompare(b.sessionDate));
+            sessionsData.sort((a, b) => new Date(a.sessionDate) - new Date(b.sessionDate));
+        } else{
+            sessionsData.sort((a, b) => new Date(b.sessionDate) - new Date(a.sessionDate));
         }
         renderSessions();
         document.getElementById("container").scrollTop = scroll;
