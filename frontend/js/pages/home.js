@@ -130,7 +130,7 @@ export async function init(){
         })
     })
     let confirmingRecording = 0;
-    document.getElementById("record-confirm").addEventListener('click', () => {
+    document.getElementById("record-confirm").addEventListener('click', async () => {
         if(confirmingRecording!=0){ return; }
         
         const interval = document.getElementById("capture-interval").value;
@@ -142,7 +142,7 @@ export async function init(){
         if(!name){ return; }
 
         confirmingRecording++;
-        window.pywebview.api.start_recording(interval, duration, name, null, compression, compile, pywebview.api.get_access_token(REFRESH_TOKEN));
+        window.pywebview.api.start_recording(interval, duration, name, null, compression, compile, await window.pywebview.api.get_access_token(REFRESH_TOKEN));
         document.getElementById("new-dialog").close();
         confirmingRecording--;
     });

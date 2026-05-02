@@ -38,7 +38,7 @@ export async function init(sessionName){
         const deleteDialog = document.getElementById("delete-dialog");
         deleteDialog.showModal();
         document.getElementById("delete-confirm").addEventListener('click', async () => {
-            await window.pywebview.api.delete_session(sessionName, pywebview.api.get_access_token(REFRESH_TOKEN));
+            await window.pywebview.api.delete_session(sessionName, await window.pywebview.api.get_access_token(REFRESH_TOKEN));
             cleanupAndNavigate("home", null);
         })
         document.getElementById("delete-cancel").addEventListener('click', () => {
@@ -72,14 +72,14 @@ export async function init(sessionName){
         });
 
         let compileConfirming = 0;
-        document.getElementById("compile-confirm").addEventListener('click', () => {
+        document.getElementById("compile-confirm").addEventListener('click', async () => {
             if(compileConfirming > 0){ return; }
             compileConfirming++;
             const fps = document.getElementById("video-fps").value;
             const duration = document.getElementById("video-duration").value;
             const deleteGallery = document.getElementById("delete-imgs-finish").checked;
 
-            window.pywebview.api.start_compiling(sessionName, fps, duration, deleteGallery, pywebview.api.get_access_token(REFRESH_TOKEN));
+            window.pywebview.api.start_compiling(sessionName, fps, duration, deleteGallery, await window.pywebview.api.get_access_token(REFRESH_TOKEN));
             compileDialog.close();
             compileConfirming--;
         });

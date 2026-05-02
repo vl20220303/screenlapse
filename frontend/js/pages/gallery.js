@@ -83,8 +83,8 @@ export async function init(sessionName){
         if(await window.pywebview.api.recording_active(sessionName)){ return; }
         const deleteDialog = document.getElementById("delete-dialog");
         deleteDialog.showModal();
-        document.getElementById("delete-confirm").addEventListener('click', () => {
-            window.pywebview.api.delete_gallery(sessionName, pywebview.api.get_access_token(REFRESH_TOKEN));
+        document.getElementById("delete-confirm").addEventListener('click', async () => {
+            window.pywebview.api.delete_gallery(sessionName, await window.pywebview.api.get_access_token(REFRESH_TOKEN));
             cleanupAndNavigate("session", sessionName);
         })
         document.getElementById("delete-cancel").addEventListener('click', () => {

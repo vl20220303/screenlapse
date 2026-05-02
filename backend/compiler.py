@@ -43,7 +43,6 @@ def compile(dirname, base_dir=None, fps:float=30, video_duration=None, delete_im
 
     out.release()
     print(f"\033[32mVideo successfully saved to {output_path}.\033[0m")
-    print("it is likely the video has not finished writing.")
 
     if delete_imgs:
         for path in png_paths[1:]:
