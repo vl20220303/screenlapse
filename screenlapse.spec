@@ -7,7 +7,8 @@ a = Analysis(
     binaries=[],
     datas=[        
         ('frontend', 'frontend'),
-        ('backend', 'backend')
+        ('backend', 'backend'),
+        ('ffmpeg/*', 'ffmpeg')
     ],
     hiddenimports=[],
     hookspath=[],

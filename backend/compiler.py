@@ -2,9 +2,16 @@ import os, send2trash
 import cv2
 import glob
 import argparse
+import subprocess
+import sys
 
 
-def compile(dirname, base_dir=None, fps:float=30, video_duration=None, delete_imgs=False):
+def resource_path(relative):
+    base = getattr(sys, '_MEIPASS', os.path.abspath("."))
+    return os.path.join(base, relative)
+
+
+def compile(dirname, base_dir=None, fps: float = 30, video_duration=None, delete_imgs=False):
     current_dir = os.path.dirname(os.path.abspath(__file__)) if base_dir is None else base_dir
     output_dir = os.path.join(current_dir, dirname)
     if not os.path.exists(output_dir):
@@ -31,17 +38,31 @@ def compile(dirname, base_dir=None, fps:float=30, video_duration=None, delete_im
     else:
         height, width, _ = first_frame.shape
 
-    fourcc = cv2.VideoWriter.fourcc(*'avc1')
-    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+    # Resolve FFmpeg path (bundled or system)
+    if sys.platform == "win32":
+        ffmpeg_path = resource_path("ffmpeg/ffmpeg.exe")
+    else:
+        ffmpeg_path = resource_path("ffmpeg/ffmpeg")
 
-    for path in png_paths:
-        frame = cv2.imread(path)
-        if frame is None:
-            print(f"Warning: could not read {path}.")
-            continue
-        out.write(frame)
+    # FFmpeg command — H.264 (avc1), browser‑compatible
+    cmd = [
+        ffmpeg_path,
+        "-y",
+        "-framerate", str(fps),
+        "-i", os.path.join(output_dir, "%d.png"),
+        "-c:v", "libx264",
+        "-pix_fmt", "yuv420p",
+        output_path
+    ]
 
-    out.release()
+    print("Running FFmpeg:", " ".join(cmd))
+
+    try:
+        subprocess.run(cmd, check=True)
+    except Exception as e:
+        print(f"\033[31mFFmpeg failed: {e}\033[0m")
+        return
+
     print(f"\033[32mVideo successfully saved to {output_path}.\033[0m")
 
     if delete_imgs:
@@ -57,4 +78,4 @@ def main():
     parser.add_argument('--delete_imgs', action='store_true', help='Delete images after compiling video')
     args = parser.parse_args()
 
-    compile(args.dirname, args.fps, args.video_duration, args.delete_imgs)
+    compile(args.dirname, fps=args.fps, video_duration=args.video_duration, delete_imgs=args.delete_imgs)
