@@ -314,7 +314,7 @@ def start():
     server_thread = threading.Thread(target=run_server, daemon=True)
     server_thread.start()
 
-    webview.start(gui="gtk", debug=True)
+    webview.start(gui="gtk", debug=False)
 
 if __name__ == "__main__":
     start()
