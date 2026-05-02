@@ -38,8 +38,17 @@ def compile(dirname, base_dir=None, fps: float = 30, video_duration=None, delete
     else:
         height, width, _ = first_frame.shape
 
+    #flags to prevent console window
+    startupinfo = None
+    creationflags = 0
+
     # Resolve FFmpeg path (bundled or system)
     if sys.platform == "win32":
+
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        creationflags = subprocess.CREATE_NO_WINDOW
+
         ffmpeg_path = resource_path("ffmpeg/ffmpeg.exe")
     else:
         ffmpeg_path = resource_path("ffmpeg/ffmpeg")
@@ -58,7 +67,12 @@ def compile(dirname, base_dir=None, fps: float = 30, video_duration=None, delete
     print("Running FFmpeg:", " ".join(cmd))
 
     try:
-        subprocess.run(cmd, check=True)
+        subprocess.run(
+            cmd,
+            check=True,
+            startupinfo=startupinfo,
+            creationflags=creationflags
+        )
     except Exception as e:
         print(f"\033[31mFFmpeg failed: {e}\033[0m")
         return

@@ -61,7 +61,7 @@ export async function init(sessionName){
             let newDuration = durationInput.value;
             newDuration = Math.max(newDuration, Math.round(gallerySize / 120));
             durationInput.value = parseFloat(newDuration.toFixed(2));
-            fpsInput.value = parseFloat((newDuration / gallerySize).toFixed(2));
+            fpsInput.value = parseFloat((gallerySize / newDuration).toFixed(2));
         });
         fpsInput.addEventListener('keyup', (event) => {
             if(event.key!="Enter"){ return; }
