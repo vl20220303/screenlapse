@@ -88,19 +88,22 @@ export async function init(){
             sessionsData.sort((a, b) => new Date(b.sessionDate) - new Date(a.sessionDate));
         } else if(sorter.value=="date9"){
             sessionsData.sort((a, b) => new Date(a.sessionDate) - new Date(b.sessionDate));
-        } else{
-            sessionsData.sort((a, b) => new Date(b.sessionDate) - new Date(a.sessionDate));
         }
         renderSessions();
         document.getElementById("container").scrollTop = scroll;
     }
 
+    function canonicalSort(arr) {
+        return arr.slice().sort((a, b) => new Date(b.sessionDate) - new Date(a.sessionDate));
+    }
+
     const checker = setInterval(async () => {
-        const newSessionsData = await window.pywebview.api.get_sessions();
+        const newSessionsData = canonicalSort(await window.pywebview.api.get_sessions());
+        const oldSessionsData = canonicalSort(sessionsData);
         const dataChanged = 
-            newSessionsData.length !== sessionsData.length || 
+            newSessionsData.length !== oldSessionsData.length || 
             newSessionsData.some((newSession, i) => {
-                const session = sessionsData[i];
+                const session = oldSessionsData[i];
                 return newSession.sessionName !== session.sessionName || 
                        newSession.sessionDate !== session.sessionDate;
         });

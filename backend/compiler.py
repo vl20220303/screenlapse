@@ -1,5 +1,5 @@
 import os, send2trash
-import cv2
+from PIL import Image
 import glob
 import argparse
 import subprocess
@@ -31,12 +31,12 @@ def compile(dirname, base_dir=None, fps: float = 30, video_duration=None, delete
     if video_duration is not None:
         fps=len(png_paths)/(video_duration*60)
 
-    first_frame = cv2.imread(png_paths[0])
+    first_frame = Image.open(png_paths[0])
     if first_frame is None:
         print(f"\033[31mFatal error: could not read {png_paths[0]}.\033[0m")
         return
     else:
-        height, width, _ = first_frame.shape
+        width, height = first_frame.size
 
     #flags to prevent console window
     startupinfo = None
