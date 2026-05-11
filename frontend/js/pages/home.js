@@ -46,10 +46,27 @@ export async function init(){
     }
     pathDisplay.addEventListener('click', updateDirPath, {once: true});
 
-
     const sessionsContainer = document.getElementById("sessions-container");
     let sessionsData = await window.pywebview.api.get_sessions();
-    sessionsData.sort((a, b) => new Date(b.sessionDate) - new Date(a.sessionDate));
+
+    function nameA(a, b) {
+        const c = a.sessionName.localeCompare(b.sessionName);
+        return c !== 0 ? c : new Date(b.sessionDate) - new Date(a.sessionDate);
+    }
+    function nameZ(a, b) {
+        const c = b.sessionName.localeCompare(a.sessionName);
+        return c !== 0 ? c : new Date(b.sessionDate) - new Date(a.sessionDate);
+    }
+    function date0(a, b) {
+        const c = new Date(b.sessionDate) - new Date(a.sessionDate);
+        return c !== 0 ? c : a.sessionName.localeCompare(b.sessionName);
+    }
+    function date9(a, b) {
+        const c = new Date(a.sessionDate) - new Date(b.sessionDate);
+        return c !== 0 ? c : a.sessionName.localeCompare(b.sessionName);
+    }
+
+    sessionsData.sort(date0);
 
     function renderSessions() {
         let sessionsHTML = "";
@@ -80,21 +97,16 @@ export async function init(){
 
     function reRenderSessions() {
         const scroll = document.getElementById("container").scrollTop;
-        if(sorter.value=="nameA"){
-            sessionsData.sort((a, b) => a.sessionName.localeCompare(b.sessionName));
-        } else if(sorter.value=="nameZ"){
-            sessionsData.sort((a, b) => b.sessionName.localeCompare(a.sessionName));
-        } else if(sorter.value=="date0"){
-            sessionsData.sort((a, b) => new Date(b.sessionDate) - new Date(a.sessionDate));
-        } else if(sorter.value=="date9"){
-            sessionsData.sort((a, b) => new Date(a.sessionDate) - new Date(b.sessionDate));
-        }
+        if(sorter.value=="nameA")       { sessionsData.sort(nameA); } 
+        else if(sorter.value=="nameZ")  { sessionsData.sort(nameZ); } 
+        else if(sorter.value=="date0")  { sessionsData.sort(date0); } 
+        else if(sorter.value=="date9")  { sessionsData.sort(date9); }
         renderSessions();
         document.getElementById("container").scrollTop = scroll;
     }
 
     function canonicalSort(arr) {
-        return arr.slice().sort((a, b) => new Date(b.sessionDate) - new Date(a.sessionDate));
+        return arr.slice().sort(date0);
     }
 
     const checker = setInterval(async () => {
