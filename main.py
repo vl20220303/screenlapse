@@ -239,13 +239,26 @@ def get_cached_thumbnail(recordings_dir, session, filename, size=(100, 100)):
 
 @lru_cache(maxsize=100)
 def get_thumbnail(recordings_dir, session, filename, size=(100, 100)):
-    file_path = Path(recordings_dir) / session / filename
+    file_path = resolve_recording_file(recordings_dir, session, Path(recordings_dir) / session / filename)
 
     with Image.open(file_path) as img:
         img = ImageOps.fit(img, size, Image.Resampling.BICUBIC)
         buffer = io.BytesIO()
         img.save(buffer, format="WEBP", quality=90)
         return buffer.getvalue()
+
+def resolve_recording_file(recordings_dir, session, filename):
+    try:
+        root = Path(recordings_dir).resolve(strict=True)
+        candidate = (root / session / filename).resolve(strict=True)
+        candidate.relative_to(root)
+    except (OSError, RuntimeError, ValueError):
+        abort(404)
+
+    if not candidate.is_file():
+        abort(404)
+
+    return candidate
 
 def start():
 
@@ -275,7 +288,8 @@ def start():
         session_path = Path(recordings_dir) / session
         if not session_path.exists():
             abort(404)
-        return send_from_directory(session_path, filename, conditional=True)
+        filename = resolve_recording_file(recordings_dir, session, filename)
+        return send_file(filename, conditional=True)
     
     @app.route('/media/<session>/<filename>/thumbnail')
     @require_access_token
