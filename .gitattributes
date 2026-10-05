@@ -1,2 +1,2 @@
 *.css linguist-detectable=False
-*.py linguist-detectable=Data
+*.py linguist-detectable=False
