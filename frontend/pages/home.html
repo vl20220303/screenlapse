@@ -25,10 +25,12 @@
                     <div class="param"><h1>Name:</h1> <input id="capture-name" autocomplete="off"></div>
                 </div>
                 <div id="record-screen-region-display">
-                    <div id="screen-display-mockup">
-                        <div id="capture-region-mockup"></div>
-                        <div id="capture-region-hover">Select region</div>
-                    </div>
+                    <button id="screen-display-mockup" type="button" aria-label="Click to select screen region">
+                        <span id="capture-region-mockup"></span>
+                        <span id="screen-display-select-hint">Click to select screen region</span>
+                    </button>
+                    <p id="capture-region-status">Entire computer display</p>
+                    <button id="region-reset" type="button">Use computer display</button>
                 </div>
             </div>
             <div class="secondary-param"><h1>Compile video on completion?</h1><input type="checkbox" id="compile-video-finish"></div>

@@ -9,12 +9,11 @@ import threading
 import socket
 import secrets
 
-from backend import screenlapse
-from backend import compiler
+from backend import region_selector, screenlapse, compiler
 
 from functools import lru_cache, wraps
 from PIL import Image, ImageOps
-import io, base64
+import io
 
 class API:
     def __init__(self):
@@ -106,6 +105,11 @@ class API:
         return list(self.active_jobs['c'].values())
     def get_active_deletions(self):
         return list(self.active_jobs['d'].values())
+
+    def get_screen_layout(self):
+        return region_selector.get_screen_layout()
+    def choose_screen_region(self):
+        return region_selector.choose_screen_region()
 
     # checks
     def get_num_images(self, session_name):

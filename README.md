@@ -16,6 +16,7 @@ The letter of the button also represents the current theme: L means light theme,
 ## Starting a recording
 Click the '+' button in the bottom-right corner to start a recording. <br><br>
 Specify the time between shots, the recording duration, the compression factor (which should be less than 1; for example, a compression factor of 0.5 results in a image compressed to half the length and width of the screen) and the name. <br><br>
+Click the virtual desktop preview to drag a selection over the actual desktop. The selector spans all connected displays, so a region can include parts of multiple monitors. The dialog previews the selected region against the desktop layout. By default, Screenlapse selects the computer's internal display when one is detected; on a desktop without an internal panel, it uses the Windows primary display. Choose **Use computer display** to restore that default selection. Press Esc to cancel. <br><br>
 The actual time between shots may differ by about 5% (the app wakes up 20x per interval to check if a screenshot should be taken to save CPU consumption and prevent drift). <br><br>
 You can also make the app compile a timelapse after the recording period; it will use 20FPS by default. <br><br>
 **Note:** Closing the app while a job is running will cancel it automatically. Any screenshots taken during that time will be preserved, but the app will not take any more screenshots and will not compile a timelapse even if 'Compile on Completion' was enabled.

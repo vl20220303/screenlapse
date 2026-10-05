@@ -126,26 +126,57 @@ export async function init(){
         cleanupAndNavigate("jobs", null);
     })
 
-    document.getElementById('new-button').addEventListener('click', function() {
+    let screenRegion = null;
+    const regionStatus = document.getElementById('capture-region-status');
+    const regionReset = document.getElementById('region-reset');
+    const screenDisplay = document.getElementById('screen-display-mockup');
+    const regionIndicator = document.getElementById('capture-region-mockup');
+    let screenLayout = null;
+
+    function updateRegionPreview(region) {
+        if (!region || !screenLayout) {
+            regionIndicator.style.visibility = 'hidden';
+            return;
+        }
+        const [left, top, width, height] = region;
+        regionIndicator.style.left = `${left / screenLayout.virtualSize[0] * 100}%`;
+        regionIndicator.style.top = `${top / screenLayout.virtualSize[1] * 100}%`;
+        regionIndicator.style.width = `${width / screenLayout.virtualSize[0] * 100}%`;
+        regionIndicator.style.height = `${height / screenLayout.virtualSize[1] * 100}%`;
+        regionIndicator.style.visibility = 'visible';
+    }
+
+    screenDisplay.addEventListener('click', async () => {
+        screenDisplay.disabled = true;
+        try {
+            const selectedRegion = await window.pywebview.api.choose_screen_region();
+            if (!selectedRegion) return;
+            screenRegion = selectedRegion;
+            regionStatus.textContent = `Selected: ${screenRegion[2]} × ${screenRegion[3]} px`;
+            updateRegionPreview(screenRegion);
+        } finally {
+            screenDisplay.disabled = false;
+        }
+    });
+    regionReset.addEventListener('click', () => {
+        screenRegion = screenLayout?.preferredRegion ?? null;
+        regionStatus.textContent = screenLayout?.preferredIsInternal ? 'Entire computer display' : 'Entire primary display';
+        updateRegionPreview(screenRegion);
+    });
+    document.getElementById('new-button').addEventListener('click', async function() {
         const recordDialog = document.getElementById("new-dialog");
         recordDialog.showModal();
-
-        const screenDisplay = document.getElementById("screen-display-mockup");
-        const aspectRatio = window.screen.width/window.screen.height;
-        screenDisplay.style.height = `${180 / aspectRatio}px`;
-
-        const regionIndicator = document.getElementById('capture-region-mockup');
-        regionIndicator.style.visibility = 'hidden';
-
-        screenDisplay.addEventListener('click', () => {
-            console.error('Implement region selection');
-            const left = 0; const top = 0;
-            const width = 0; const height = 0;
-
-            regionIndicator.style.left = `${left}%`; regionIndicator.style.top = `${top}%`;
-            regionIndicator.style.width = `${width}%`; regionIndicator.style.height = `${height}%`;
-            regionIndicator.style.visibility = 'visible';
-        })
+        screenLayout = await window.pywebview.api.get_screen_layout();
+        const scale = Math.min(146 / screenLayout.virtualSize[0], 76 / screenLayout.virtualSize[1]);
+        screenDisplay.style.width = `${screenLayout.virtualSize[0] * scale + 4}px`;
+        screenDisplay.style.height = `${screenLayout.virtualSize[1] * scale + 4}px`;
+        if (screenRegion === null) {
+            screenRegion = screenLayout.preferredRegion;
+        }
+        const preferredName = screenLayout.preferredIsInternal ? 'computer display' : 'primary display';
+        regionStatus.textContent = `Entire ${preferredName}`;
+        regionReset.textContent = `Use ${preferredName}`;
+        updateRegionPreview(screenRegion);
     })
     let confirmingRecording = 0;
     document.getElementById("record-confirm").addEventListener('click', async () => {
@@ -160,9 +191,12 @@ export async function init(){
         if(!name){ return; }
 
         confirmingRecording++;
-        window.pywebview.api.start_recording(interval, duration, name, null, compression, compile, await window.pywebview.api.get_access_token(REFRESH_TOKEN));
-        document.getElementById("new-dialog").close();
-        confirmingRecording--;
+        try {
+            await window.pywebview.api.start_recording(interval, duration, name, screenRegion, compression, compile, await window.pywebview.api.get_access_token(REFRESH_TOKEN));
+            document.getElementById("new-dialog").close();
+        } finally {
+            confirmingRecording--;
+        }
     });
     document.getElementById("record-cancel").addEventListener('click', () => {
         document.getElementById("new-dialog").close();

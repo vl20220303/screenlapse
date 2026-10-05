@@ -2,10 +2,38 @@ import pyautogui
 import time
 import os
 import argparse
+import ctypes
+from contextlib import contextmanager
+from PIL import ImageGrab
 try:
     from . import compiler
 except ImportError:
     import compiler
+
+
+@contextmanager
+def per_monitor_dpi_awareness():
+    set_context = ctypes.windll.user32.SetThreadDpiAwarenessContext
+    set_context.argtypes = [ctypes.c_void_p]
+    set_context.restype = ctypes.c_void_p
+    previous_context = set_context(ctypes.c_void_p(-4))
+    if not previous_context:
+        raise ctypes.WinError()
+    try:
+        yield
+    finally:
+        set_context(previous_context)
+
+
+def capture_screen_region(screen_region):
+    if screen_region is None:
+        return pyautogui.screenshot()
+
+    left, top, width, height = screen_region
+    with per_monitor_dpi_awareness():
+        return ImageGrab.grab(all_screens=True).crop(
+            (left, top, left + width, top + height)
+        )
 
 
 def run(interval_minutes, base_dir=None, runtime_hours=5.0, dirname="output", screen_region:tuple[int,int,int,int]|None=None, compression_scale:float=1, compile_on_completion=False):
@@ -34,7 +62,7 @@ def run(interval_minutes, base_dir=None, runtime_hours=5.0, dirname="output", sc
 
         if current_interval > previous_interval:
             file_name = os.path.join(output_dir, f"{current_interval}.png")
-            image = pyautogui.screenshot(file_name, region=screen_region)
+            image = capture_screen_region(screen_region)
             width, height = image.size
             print(width, height)
             image = image.resize((int(width * compression_scale), int(height * compression_scale)))
