@@ -4,6 +4,7 @@ Its main function is to take screenshots of the screen at continuous intervals, 
 The app also features an image viewer and video player so you can monitor and view your recordings in real-time.
 # Setup
 Setup is pretty simple: just download the .zip, extract it to a folder, and run screenlapse.exe. <br><br>
+**Note**: it is possible that due to device security programs, certain parts of the .zip may be blocked from running and cause a program crash. Unblock the .zip before extracting to mitigate this. <br><br>
 This will bring up a one-time setup page where you can select the home directory for recordings and theme (these can both be changed later). <br><br>
 Once you're done, click 'Finish Setup'. This will bring you to the home page. <br><br>
 # Usage
