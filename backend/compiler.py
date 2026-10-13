@@ -61,20 +61,24 @@ def compile(dirname, base_dir=None, fps: float = 30, video_duration=None, delete
         "-i", os.path.join(output_dir, "%d.png"),
         "-c:v", "libx264",
         "-pix_fmt", "yuv420p",
+        "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2",
         output_path
     ]
 
     print("Running FFmpeg:", " ".join(cmd))
 
     try:
-        subprocess.run(
+        result = subprocess.run(
             cmd,
             check=True,
             startupinfo=startupinfo,
-            creationflags=creationflags
+            creationflags=creationflags,
+            capture_output=True,
+            text=True,
         )
-    except Exception as e:
-        print(f"\033[31mFFmpeg failed: {e}\033[0m")
+    except subprocess.CalledProcessError as e:
+        print(f"\033[31mFFmpeg exit code: {e.returncode} ({e.returncode:#x})")
+        print(e.stderr)
         return
 
     print(f"\033[32mVideo successfully saved to {output_path}.\033[0m")
