@@ -290,7 +290,7 @@ def start():
     def index():
         frontend_dir = Path(__file__).parent / "frontend"
         response = send_from_directory(frontend_dir, "index.html")
-        response.set_cookie("LONG_LIVED_TOKEN", session_token, httponly=True)
+        response.set_cookie("LONG_LIVED_TOKEN", session_token, httponly=True, samesite='Strict')
         return response
 
     @app.route('/<path:filename>')
