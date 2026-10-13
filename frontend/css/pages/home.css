@@ -147,28 +147,51 @@
 }
 
 #record-screen-region-display{
-    height: 150px; width: 175px; overflow: hidden; display: flex;
-    align-items: center; justify-content: center;
+    height: 180px; width: 190px; overflow: hidden; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
 }
 #screen-display-mockup{
-    height: 120px; width: 180px; display: flex;
+    height: 60px; width: 100px; flex: 0 0 auto; position: relative;
     background-color: var(--item-color);
-    border: 3px dashed var(--text-color-secondary); border-radius: 5px;
-    position: relative;
+    border: 2px dashed var(--text-color-secondary); border-radius: 4px;
+    box-sizing: border-box; padding: 0; overflow: hidden;
+    appearance: none; color: var(--text-color); cursor: crosshair;
+}
+#screen-display-mockup:hover,
+#screen-display-mockup:focus-visible{
+    border-style: solid; border-color: var(--text-color);
+    outline: none;
+}
+#screen-display-mockup:disabled{ cursor: wait; }
+#screen-display-select-hint{
+    position: absolute; inset: 0; display: flex;
+    align-items: center; justify-content: center;
+    padding: 4px; text-align: center; font-size: 11px;
+    background-color: var(--item-hover); opacity: 0;
+    pointer-events: none;
+}
+#screen-display-mockup:hover #screen-display-select-hint,
+#screen-display-mockup:focus-visible #screen-display-select-hint{
+    opacity: 0.9;
 }
 #capture-region-mockup{
-    position: absolute;
-    left: 0px; top: 0px; height: 20px; width: 80px;
-    background-color: var(--item-color);
-    border: 3px solid var(--text-color-secondary); border-radius: 5px;
+    position: absolute; visibility: hidden; pointer-events: none;
+    border: 2px solid var(--add-color); border-radius: 2px;
+    background-color: rgb(from var(--add-color) r g b / 0.2);
+    box-sizing: border-box;
 }
-#capture-region-hover{
-    position: absolute; margin: 0; padding: 0;
-    height: 100%; width: 100%; justify-self: center; align-self: bottom;
-    display: flex; align-items: center; justify-content: center;
-    background-color: var(--item-hover); color: var(--text-color); opacity: 0;
+#region-reset{
+    padding: 7px 9px;
+    color: var(--text-color); background-color: var(--item-color);
+    border: 1px solid var(--text-color-secondary); border-radius: 5px;
+    font-family: 'Segoe UI', 'SF Pro', Verdana, Arial, sans-serif;
 }
-#capture-region-hover:hover{ cursor: pointer; opacity: 0.9; transition: all 0.1s ease-in-out;}
+#region-reset:hover{
+    cursor: pointer; background-color: var(--item-hover);
+}
+#capture-region-status{
+    margin: 0; color: var(--text-color-secondary); font-size: 13px; text-align: center;
+}
 
 
 .secondary-param{
